@@ -169,7 +169,7 @@ export class PopoverInline extends PopoverDesktop {
        * In case tool had special handling for toggling button (like link tool which modifies selection)
        * we need to call handleClick on nested popover trigger item
        */
-      this.nestedPopoverTriggerItem?.handleClick();
+      this.nestedPopoverTriggerItem?.clear()
 
       /**
        * Then close the nested popover

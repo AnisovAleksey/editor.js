@@ -172,21 +172,11 @@ export default class LinkInlineTool implements InlineTool {
        * Unlink icon pressed
        */
       if (parentAnchor) {
-        /**
-         * If input is not opened, treat click as explicit unlink action.
-         * If input is opened (e.g., programmatic close when switching tools), avoid unlinking.
-         */
-        if (!this.inputOpened) {
-          this.selection.expandToTag(parentAnchor);
-          this.unlink();
-          this.closeActions();
-          this.checkState();
-          this.toolbar.close();
-        } else {
-          /** Only close actions without clearing saved selection to preserve user state */
-          this.closeActions(false);
-          this.checkState();
-        }
+        this.selection.expandToTag(parentAnchor);
+        this.unlink();
+        this.closeActions();
+        this.checkState();
+        this.toolbar.close();
 
         return;
       }
@@ -227,8 +217,15 @@ export default class LinkInlineTool implements InlineTool {
   /**
    * Function called with Inline Toolbar closing
    */
-  public clear(): void {
-    this.closeActions();
+  public clear(force = false): void {
+    if (force) {
+      console.log("here");
+      this.selection.restore();
+      this.selection.removeFakeBackground();
+    } else {
+      this.closeActions();
+    }
+
   }
 
   /**

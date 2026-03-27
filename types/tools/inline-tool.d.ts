@@ -38,7 +38,7 @@ export interface InlineTool extends BaseTool<HTMLElement | MenuConfig> {
    * @deprecated 2020 10/02 - The new instance will be created each time the button is rendered. So clear is not needed.
    *                          Better to create the 'destroy' method in a future.
    */
-  clear?(): void;
+  clear?(force?: boolean): void;
 }
 
 
