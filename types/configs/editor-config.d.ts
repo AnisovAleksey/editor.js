@@ -3,6 +3,7 @@ import {API, LogLevels, OutputData} from '../index';
 import {SanitizerConfig} from './sanitizer-config';
 import {I18nConfig} from './i18n-config';
 import { BlockMutationEvent } from '../events/block';
+import { ToolbarPlugin } from './toolbar-plugin';
 
 export interface EditorConfig {
   /**
@@ -106,6 +107,14 @@ export interface EditorConfig {
   tunes?: string[];
 
   /**
+   * Toolbar customization settings
+   */
+  toolbar?: {
+    /** Custom toolbar plugin that controls toolbar buttons UI */
+    plugin?: ToolbarPlugin;
+  };
+
+  /**
    * Section for style-related settings
    */
   style?: {
@@ -114,5 +123,13 @@ export interface EditorConfig {
      * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce
      */
     nonce?: string;
+
+    /**
+     * Color theme for the editor
+     * - 'auto' (default): follows system prefers-color-scheme
+     * - 'light': always light theme
+     * - 'dark': always dark theme
+     */
+    theme?: 'light' | 'dark' | 'auto';
   }
 }

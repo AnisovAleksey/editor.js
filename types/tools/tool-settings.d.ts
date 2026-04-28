@@ -66,6 +66,12 @@ export interface ExternalToolSettings<Config extends object = any> {
    * It will be hidden from Toolbox when false is specified.
    */
   toolbox?: ToolboxConfig | false;
+
+  /**
+   * If true, the tool will not appear in the Toolbox (plus button),
+   * but will still be available in the "Convert to" menu.
+   */
+  toolboxHidden?: boolean;
 }
 
 /**

@@ -1,0 +1,104 @@
+/**
+ * Editor.js Dark Theme
+ *
+ * Only variable overrides — no CSS rules.
+ * Uses :not(.codex-editor--light) so auto mode respects media query,
+ * light mode blocks it, and dark mode forces it via class.
+ */
+
+@media (prefers-color-scheme: dark) {
+  .codex-editor:not(.codex-editor--light) {
+    /* ===== Base ===== */
+    --editor-bg: #1a1a1a;
+    --editor-bg-hover: #252525;
+    --editor-bg-light: #2a2a2e;
+    --editor-text: #e5e5e5;
+    --editor-text-secondary: #9ca3af;
+    --editor-border: #2a2a2a;
+    --editor-border-icon: rgba(100, 100, 104, 0.48);
+    --editor-border-input: rgba(60, 60, 64, 0.40);
+    --editor-shadow: rgba(0, 0, 0, 0.30);
+    --editor-shadow-overlay: rgba(0, 0, 0, 0.40);
+    --editor-shadow-input: rgba(0, 0, 0, 0.15);
+    --editor-shadow-focus: rgba(7, 161, 227, 0.15);
+    --editor-active: #60a5fa;
+    --editor-active-bg: rgba(96, 165, 250, 0.15);
+    --editor-focus-bg: rgba(34, 186, 255, 0.12);
+    --editor-selection: #2d4263;
+    --editor-inline-selection: #2d4263;
+    --editor-confirm: #E24A4A;
+    --editor-confirm-hover: #CE4343;
+
+    /* ===== Buttons ===== */
+    --editor-button-bg: #2a2a2e;
+    --editor-button-bg-hover: #3a3a3e;
+    --editor-button-shadow: rgba(0, 0, 0, 0.15);
+    --editor-button-shadow-hover: rgba(0, 0, 0, 0.25);
+
+    /* ===== Toolbar buttons ===== */
+    --editor-toolbar-btn-color: var(--editor-text-secondary);
+    --editor-toolbar-btn-bg: var(--editor-bg);
+    --editor-toolbar-btn-hover-color: var(--editor-text);
+    --editor-toolbar-btn-hover-bg: var(--editor-bg-hover);
+
+    /* ===== Inline toolbar ===== */
+    --editor-inline-bg: var(--editor-bg-light);
+    --editor-inline-border: #3a3a3e;
+    --editor-inline-shadow: rgba(0, 0, 0, 0.4);
+    --editor-inline-separator: #383838;
+    --editor-inline-tool-color: #c8c8cc;
+    --editor-inline-tool-hover-bg: #3a3a3e;
+    --editor-inline-tool-hover-color: #fff;
+
+    /* ===== Popover ===== */
+    --editor-popover-icon-bg: var(--editor-bg);
+  }
+}
+
+/* Forced dark theme via config */
+.codex-editor.codex-editor--dark {
+  /* ===== Base ===== */
+  --editor-bg: #1a1a1a;
+  --editor-bg-hover: #252525;
+  --editor-bg-light: #2a2a2e;
+  --editor-text: #e5e5e5;
+  --editor-text-secondary: #9ca3af;
+  --editor-border: #2a2a2a;
+  --editor-border-icon: rgba(100, 100, 104, 0.48);
+  --editor-border-input: rgba(60, 60, 64, 0.40);
+  --editor-shadow: rgba(0, 0, 0, 0.30);
+  --editor-shadow-overlay: rgba(0, 0, 0, 0.40);
+  --editor-shadow-input: rgba(0, 0, 0, 0.15);
+  --editor-shadow-focus: rgba(7, 161, 227, 0.15);
+  --editor-active: #60a5fa;
+  --editor-active-bg: rgba(96, 165, 250, 0.15);
+  --editor-focus-bg: rgba(34, 186, 255, 0.12);
+  --editor-selection: #2d4263;
+  --editor-inline-selection: #2d4263;
+  --editor-confirm: #E24A4A;
+  --editor-confirm-hover: #CE4343;
+
+  /* ===== Buttons ===== */
+  --editor-button-bg: #2a2a2e;
+  --editor-button-bg-hover: #3a3a3e;
+  --editor-button-shadow: rgba(0, 0, 0, 0.15);
+  --editor-button-shadow-hover: rgba(0, 0, 0, 0.25);
+
+  /* ===== Toolbar buttons ===== */
+  --editor-toolbar-btn-color: var(--editor-text-secondary);
+  --editor-toolbar-btn-bg: var(--editor-bg);
+  --editor-toolbar-btn-hover-color: var(--editor-text);
+  --editor-toolbar-btn-hover-bg: var(--editor-bg-hover);
+
+  /* ===== Inline toolbar ===== */
+  --editor-inline-bg: var(--editor-bg-light);
+  --editor-inline-border: #3a3a3e;
+  --editor-inline-shadow: rgba(0, 0, 0, 0.4);
+  --editor-inline-separator: #383838;
+  --editor-inline-tool-color: #c8c8cc;
+  --editor-inline-tool-hover-bg: #3a3a3e;
+  --editor-inline-tool-hover-color: #fff;
+
+  /* ===== Popover ===== */
+  --editor-popover-icon-bg: var(--editor-bg);
+}

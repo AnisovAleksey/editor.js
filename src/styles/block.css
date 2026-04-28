@@ -17,7 +17,7 @@
   }
 
   &--selected &__content {
-    background: var(--selectionColor);
+    background: var(--editor-selection, #e1f2ff);
 
     /**
      * Workaround Safari case when user can select inline-fragment with cross-block-selection
@@ -70,8 +70,8 @@
         90deg,
         var(--color-active-icon),
         var(--color-active-icon) 1px,
-        #fff 1px,
-        #fff 6px
+        var(--editor-bg) 1px,
+        var(--editor-bg) 6px
       );
     }
   }

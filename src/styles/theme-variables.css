@@ -1,0 +1,52 @@
+/**
+ * Editor.js Theme Variables
+ *
+ * All color values as CSS custom properties on .codex-editor.
+ * Light theme defaults. Dark theme overrides in theme-dark.css.
+ */
+.codex-editor {
+  /* ===== Base ===== */
+  --editor-bg: #FFFFFF;
+  --editor-bg-hover: #F8F8F8;
+  --editor-bg-light: #eff2f5;
+  --editor-text: #1D202B;
+  --editor-text-secondary: #707684;
+  --editor-border: #EFF0F1;
+  --editor-border-icon: rgba(201, 201, 204, 0.48);
+  --editor-border-input: rgba(226, 226, 229, 0.20);
+  --editor-shadow: rgba(13, 20, 33, 0.10);
+  --editor-shadow-overlay: rgba(13, 20, 33, 0.13);
+  --editor-shadow-input: rgba(35, 44, 72, 0.06);
+  --editor-shadow-focus: rgba(7, 161, 227, 0.08);
+  --editor-active: #388AE5;
+  --editor-active-bg: rgba(56, 138, 229, 0.1);
+  --editor-focus-bg: rgba(34, 186, 255, 0.08);
+  --editor-selection: #e1f2ff;
+  --editor-inline-selection: #d4ecff;
+  --editor-confirm: #E24A4A;
+  --editor-confirm-hover: #CE4343;
+
+  /* ===== Buttons ===== */
+  --editor-button-bg: #fff;
+  --editor-button-bg-hover: #FBFCFE;
+  --editor-button-shadow: rgba(18, 30, 57, 0.04);
+  --editor-button-shadow-hover: rgba(18, 30, 57, 0.08);
+
+  /* ===== Toolbar buttons ===== */
+  --editor-toolbar-btn-color: var(--editor-text);
+  --editor-toolbar-btn-bg: transparent;
+  --editor-toolbar-btn-hover-color: var(--editor-text);
+  --editor-toolbar-btn-hover-bg: var(--editor-bg-light);
+
+  /* ===== Inline toolbar ===== */
+  --editor-inline-bg: var(--editor-bg);
+  --editor-inline-border: var(--editor-border);
+  --editor-inline-shadow: var(--editor-shadow-overlay);
+  --editor-inline-separator: var(--editor-border-icon);
+  --editor-inline-tool-color: var(--editor-text);
+  --editor-inline-tool-hover-bg: var(--editor-bg-hover);
+  --editor-inline-tool-hover-color: var(--editor-text);
+
+  /* ===== Popover ===== */
+  --editor-popover-icon-bg: transparent;
+}

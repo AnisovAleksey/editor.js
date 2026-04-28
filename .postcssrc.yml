@@ -22,6 +22,10 @@ plugins:
     # https://github.com/csstools/postcss-preset-env#preserve
     preserve: false
 
+    features:
+      custom-properties:
+        preserve: true
+
   # Nested rules unwrapper
   # https://github.com/postcss/postcss-nested
   #

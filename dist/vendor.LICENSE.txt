@@ -1,12 +1,12 @@
 Name: @babel/register
-Version: 7.21.0
+Version: 7.28.6
 License: MIT
 Private: false
 Description: babel require hook
 Repository: https://github.com/babel/babel.git
 Homepage: https://babel.dev/docs/en/next/babel-register
 Author: The Babel Team (https://babel.dev/team)
-License Copyright:
+License Text:
 ===
 
 MIT License
@@ -32,7 +32,6 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 ---
 
 Name: nanoid
@@ -42,7 +41,7 @@ Private: false
 Description: A tiny (116 bytes), secure URL-friendly unique string ID generator
 Repository: undefined
 Author: Andrey Sitnik <andrey@sitnik.ru>
-License Copyright:
+License Text:
 ===
 
 The MIT License (MIT)
@@ -66,7 +65,6 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 ---
 
 Name: codex-notifier
@@ -77,7 +75,7 @@ Description: Simple notifications for your website
 Repository: git+https://github.com/codex-team/js-notifier.git
 Homepage: https://github.com/codex-team/js-notifier#readme
 Author: CodeX Team <team@ifmo.su>
-License Copyright:
+License Text:
 ===
 
 MIT License
@@ -102,7 +100,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
 ---
 
 Name: html-janitor
@@ -110,7 +107,7 @@ Version: 2.0.4
 License: null
 Private: false
 Repository: https://github.com/guardian/html-janitor.git
-License Copyright:
+License Text:
 ===
 
 Apache License
@@ -315,7 +312,6 @@ Apache License
    See the License for the specific language governing permissions and
    limitations under the License.
 
-
 ---
 
 Name: codex-tooltip
@@ -326,7 +322,7 @@ Description: Simple tooltips module
 Repository: git+https://github.com/codex-team/codex.tooltips
 Homepage: https://github.com/codex-team/codex.tooltips
 Author: CodeX <team@codex.so>
-License Copyright:
+License Text:
 ===
 
 Copyright 2019 CodeX https://codex.so
@@ -337,7 +333,6 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 ---
 
 Name: @codexteam/icons
@@ -345,7 +340,7 @@ Version: 0.3.2
 License: MIT
 Private: false
 Repository: git+https://github.com/codex-team/icon-pack.git
-License Copyright:
+License Text:
 ===
 
 MIT License
@@ -370,7 +365,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
 ---
 
 Name: @codexteam/shortcuts
@@ -381,7 +375,7 @@ Description: Library for handling keyboard shortcuts
 Repository: git+https://github.com/codex-team/codex.shortcuts.git
 Homepage: https://github.com/codex-team/codex.shortcuts#readme
 Author: CodeX (https://codex.so)
-License Copyright:
+License Text:
 ===
 
 MIT License
@@ -409,7 +403,7 @@ SOFTWARE.
 ---
 
 Name: @editorjs/caret
-Version: 1.0.1
+Version: 1.0.3
 License: MIT
 Private: false
 Description: Utils useful for work with caret for Editor.js tools development
@@ -418,7 +412,7 @@ Repository: undefined
 ---
 
 Name: @editorjs/dom
-Version: 1.0.0
+Version: 1.0.1
 License: MIT
 Private: false
 Description: Utils useful for work with dom for Editor.js tools development
@@ -427,7 +421,7 @@ Repository: undefined
 ---
 
 Name: @editorjs/helpers
-Version: 1.0.0
+Version: 1.0.1
 License: MIT
 Private: false
 Description: Utils useful for Editor.js tools development
@@ -436,13 +430,13 @@ Repository: undefined
 ---
 
 Name: @editorjs/paragraph
-Version: 2.11.6
+Version: 2.11.7
 License: MIT
 Private: false
 Description: Paragraph Tool for Editor.js
 Repository: undefined
 Author: CodeX <team@codex.so>
-License Copyright:
+License Text:
 ===
 
 MIT License

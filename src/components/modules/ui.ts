@@ -304,6 +304,17 @@ export default class UI extends Module<UINodes> {
      */
     this.nodes.redactor.style.paddingBottom = this.config.minHeight + 'px';
 
+    /**
+     * Apply theme class based on config
+     */
+    const theme = this.config.style?.theme || 'auto';
+
+    if (theme === 'dark') {
+      this.nodes.wrapper.classList.add('codex-editor--dark');
+    } else if (theme === 'light') {
+      this.nodes.wrapper.classList.add('codex-editor--light');
+    }
+
     this.nodes.wrapper.appendChild(this.nodes.redactor);
     this.nodes.holder.appendChild(this.nodes.wrapper);
 

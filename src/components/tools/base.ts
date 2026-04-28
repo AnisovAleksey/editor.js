@@ -31,6 +31,10 @@ export enum UserSettings {
    * Tool configuration
    */
   Config = 'config',
+  /**
+   * Hide tool from Toolbox while keeping it available for conversion
+   */
+  ToolboxHidden = 'toolboxHidden',
 }
 
 /**

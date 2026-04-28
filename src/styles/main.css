@@ -1,4 +1,6 @@
 @import './variables.css';
+@import './theme-variables.css';
+@import './theme-dark.css';
 @import './ui.css';
 @import './toolbar.css';
 @import './toolbox.css';

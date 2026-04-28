@@ -78,6 +78,9 @@ export {
   Dictionary,
   DictValue,
   I18nConfig,
+  ToolbarPlugin,
+  ToolbarPluginContext,
+  ToolbarBlockInfo,
 } from './configs';
 
 export * from './utils/popover';

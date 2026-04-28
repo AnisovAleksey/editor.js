@@ -10,20 +10,20 @@
   --max-height: 270px;
   --padding: 6px;
   --offset-from-target: 8px;
-  --color-border: #EFF0F1;
-  --color-shadow: rgba(13, 20, 33, 0.10);
-  --color-background: white;
-  --color-text-primary: black;
-  --color-text-secondary: #707684;
-  --color-border-icon: rgb(201 201 204 / 48%);
-  --color-border-icon-disabled: #EFF0F1;
-  --color-text-icon-active: #388AE5;
-  --color-background-icon-active: rgba(56, 138, 229, 0.1);
-  --color-background-item-focus: rgba(34, 186, 255, 0.08);
-  --color-shadow-item-focus: rgba(7, 161, 227, 0.08);
-  --color-background-item-hover: #F8F8F8;
-  --color-background-item-confirm: #E24A4A;
-  --color-background-item-confirm-hover: #CE4343;
+  --color-border: var(--editor-border);
+  --color-shadow: var(--editor-shadow);
+  --color-background: var(--editor-bg);
+  --color-text-primary: var(--editor-text);
+  --color-text-secondary: var(--editor-text-secondary);
+  --color-border-icon: var(--editor-border-icon);
+  --color-border-icon-disabled: var(--editor-border);
+  --color-text-icon-active: var(--editor-active);
+  --color-background-icon-active: var(--editor-active-bg);
+  --color-background-item-focus: var(--editor-focus-bg);
+  --color-shadow-item-focus: var(--editor-shadow-focus);
+  --color-background-item-hover: var(--editor-bg-hover);
+  --color-background-item-confirm: var(--editor-confirm);
+  --color-background-item-confirm-hover: var(--editor-confirm-hover);
   --popover-top: calc(100% + var(--offset-from-target));
   --popover-left: 0;
   --nested-popover-overlap: 4px;
@@ -95,7 +95,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--color-dark);
+      background: var(--editor-text);
       z-index: 3;
       opacity: 0.5;
       transition: opacity 0.12s ease-in;
@@ -222,6 +222,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--editor-popover-icon-bg);
 
     svg {
       width: var(--icon-size);
@@ -426,7 +427,7 @@
     background: transparent;
     width: 36px;
     height: 36px;
-    color: var(--color-text-primary);
+    color: var(--editor-text);
 
     svg {
       display: block;

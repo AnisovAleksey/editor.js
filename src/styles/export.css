@@ -14,7 +14,7 @@
  */
 .cdx-input {
   border: 1px solid var(--color-gray-border);
-  box-shadow: inset 0 1px 2px 0 rgba(35, 44, 72, 0.06);
+  box-shadow: inset 0 1px 2px 0 var(--editor-shadow-input);
   border-radius: 3px;
   padding: 10px 12px;
   outline: none;
@@ -129,16 +129,16 @@
   border-radius: 3px;
   border: 1px solid var(--color-gray-border);
   font-size: 14.9px;
-  background: #fff;
-  box-shadow: 0 2px 2px 0 rgba(18,30,57,0.04);
+  background: var(--editor-button-bg);
+  box-shadow: 0 2px 2px 0 var(--editor-button-shadow);
   color: var(--grayText);
   text-align: center;
   cursor: pointer;
 
   @media (--can-hover) {
     &:hover {
-      background: #FBFCFE;
-      box-shadow: 0 1px 3px 0 rgba(18,30,57,0.08);
+      background: var(--editor-button-bg-hover);
+      box-shadow: 0 1px 3px 0 var(--editor-button-shadow-hover);
     }
   }
 

@@ -1,16 +1,15 @@
 import Module from '../../__module';
 import $, { calculateBaseline } from '../../dom';
 import * as _ from '../../utils';
-import I18n from '../../i18n';
-import { I18nInternalNS } from '../../i18n/namespace-internal';
-import * as tooltip from '../../utils/tooltip';
 import type { ModuleConfig } from '../../../types-internal/module-config';
 import type Block from '../../block';
 import Toolbox, { ToolboxEvent } from '../../ui/toolbox';
-import { IconMenu, IconPlus } from '@codexteam/icons';
+import { IconPlus } from '@codexteam/icons';
 import { BlockHovered } from '../../events/BlockHovered';
-import { beautifyShortcut } from '../../utils';
-import { getKeyboardKeyForCode } from '../../utils/keyboard';
+import I18n from '../../i18n';
+import { I18nInternalNS } from '../../i18n/namespace-internal';
+import type { ToolbarPlugin, ToolbarPluginContext, ToolbarBlockInfo } from '../../../../types/configs/toolbar-plugin';
+import DefaultToolbarPlugin from './default-plugin';
 
 /**
  * @todo Tab on non-empty block should open Block Settings of the hoveredBlock (not where caret is set)
@@ -37,9 +36,6 @@ interface ToolbarNodes {
   wrapper: HTMLElement | undefined;
   content: HTMLElement | undefined;
   actions: HTMLElement | undefined;
-
-  plusButton: HTMLElement | undefined;
-  settingsToggler: HTMLElement | undefined;
 }
 /**
  *
@@ -49,9 +45,8 @@ interface ToolbarNodes {
  * |                                                                                           |
  * |  ..................... Content .........................................................  |
  * |  .                                                   ........ Block Actions ...........   |
- * |  .                                                   .        [Open Settings]         .   |
- * |  .  [Plus Button]  [Toolbox: {Tool1}, {Tool2}]       .                                .   |
- * |  .                                                   .        [Settings Panel]        .   |
+ * |  .                                                   .                                .   |
+ * |  .  [Plugin UI]  [Toolbox: {Tool1}, {Tool2}]         .        [Settings Panel]        .   |
  * |  .                                                   ..................................   |
  * |  .......................................................................................  |
  * |                                                                                           |
@@ -84,13 +79,6 @@ interface ToolbarNodes {
  * @property {Element} nodes.wrapper        - Toolbar main element
  * @property {Element} nodes.content        - Zone with Plus button and toolbox.
  * @property {Element} nodes.actions        - Zone with Block Settings and Remove Button
- * @property {Element} nodes.blockActionsButtons   - Zone with Block Buttons: [Settings]
- * @property {Element} nodes.plusButton     - Button that opens or closes Toolbox
- * @property {Element} nodes.toolbox        - Container for tools
- * @property {Element} nodes.settingsToggler - open/close Settings Panel button
- * @property {Element} nodes.settings          - Settings Panel
- * @property {Element} nodes.pluginSettings    - Plugin Settings section of Settings Panel
- * @property {Element} nodes.defaultSettings   - Default Settings section of Settings Panel
  */
 export default class Toolbar extends Module<ToolbarNodes> {
   /**
@@ -103,6 +91,11 @@ export default class Toolbar extends Module<ToolbarNodes> {
    * It will be created in requestIdleCallback so it can be null in some period of time
    */
   private toolboxInstance: Toolbox | null = null;
+
+  /**
+   * Toolbar plugin instance
+   */
+  private plugin: ToolbarPlugin | null = null;
 
   /**
    * @class
@@ -209,17 +202,6 @@ export default class Toolbar extends Module<ToolbarNodes> {
       },
     };
   }
-
-  /**
-   * Methods for working with Block Tunes toggler
-   */
-  private get blockTunesToggler(): { hide: () => void; show: () => void } {
-    return {
-      hide: (): void => this.nodes.settingsToggler.classList.add(this.CSS.settingsTogglerHidden),
-      show: (): void => this.nodes.settingsToggler.classList.remove(this.CSS.settingsTogglerHidden),
-    };
-  }
-
 
   /**
    * Toggles read-only mode
@@ -335,8 +317,15 @@ export default class Toolbar extends Module<ToolbarNodes> {
      */
     } else {
       const baseline = calculateBaseline(firstInput);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const toolbarActionsHeight =  parseInt(window.getComputedStyle(this.nodes.plusButton!).height, 10);
+
+      /**
+       * Use the plus button height as reference for toolbar actions height.
+       * Fall back to the actions container if plus button is not available (custom plugin).
+       */
+      const heightRef = this.nodes.actions?.querySelector(`.${this.CSS.plusButton}`) as HTMLElement | null
+        ?? this.nodes.actions;
+      const toolbarActionsHeight = heightRef ? parseInt(window.getComputedStyle(heightRef).height, 10) : 26;
+
       /**
        * Visual padding inside the SVG icon
        */
@@ -355,12 +344,19 @@ export default class Toolbar extends Module<ToolbarNodes> {
     this.nodes.wrapper!.style.top = `${Math.floor(toolbarY)}px`;
 
     /**
-     * Do not show Block Tunes Toggler near single and empty block
+     * Notify plugin about the hovered block
      */
-    if (this.Editor.BlockManager.blocks.length === 1 && block.isEmpty) {
-      this.blockTunesToggler.hide();
-    } else {
-      this.blockTunesToggler.show();
+    if (this.plugin) {
+      const blockInfo: ToolbarBlockInfo = {
+        id: block.id,
+        name: block.name,
+        isEmpty: block.isEmpty,
+        holder: block.holder,
+        blockCount: this.Editor.BlockManager.blocks.length,
+        isMobile,
+      };
+
+      this.plugin.onBlockHover(blockInfo);
     }
 
     this.open();
@@ -411,9 +407,6 @@ export default class Toolbar extends Module<ToolbarNodes> {
    */
   private async make(): Promise<void> {
     this.nodes.wrapper = $.make('div', this.CSS.toolbar);
-    /**
-     * @todo detect test environment and add data-cy="toolbar" to use it in tests instead of class name
-     */
 
     /**
      * Make Content Zone and Actions Zone
@@ -429,64 +422,32 @@ export default class Toolbar extends Module<ToolbarNodes> {
     $.append(this.nodes.content, this.nodes.actions);
 
     /**
-     * Fill Content Zone:
-     *  - Plus Button
-     *  - Toolbox
+     * Create Toolbox and BlockSettings first, append to actions as default location.
+     * Plugins can reparent these elements for custom positioning.
      */
-    this.nodes.plusButton = $.make('div', this.CSS.plusButton, {
-      innerHTML: IconPlus,
-    });
-    $.append(this.nodes.actions, this.nodes.plusButton);
+    const toolboxEl = this.makeToolbox();
+    const settingsEl = this.Editor.BlockSettings.getElement();
 
-    this.readOnlyMutableListeners.on(this.nodes.plusButton, 'click', () => {
-      tooltip.hide(true);
-      this.plusButtonClicked();
-    }, false);
+    $.append(this.nodes.actions, toolboxEl);
+    $.append(this.nodes.actions, settingsEl);
 
     /**
-     * Add events to show/hide tooltip for plus button
+     * Initialize toolbar plugin
+     * Use custom plugin from config or fall back to DefaultToolbarPlugin
      */
-    const tooltipContent = $.make('div');
+    this.plugin = this.config.toolbar?.plugin ?? new DefaultToolbarPlugin();
 
-    tooltipContent.appendChild(document.createTextNode(I18n.ui(I18nInternalNS.ui.toolbar.toolbox, 'Add')));
-    tooltipContent.appendChild($.make('div', this.CSS.plusButtonShortcut, {
-      textContent: '/',
-    }));
+    const pluginContext: ToolbarPluginContext = {
+      actionsContainer: this.nodes.actions!,
+      toolboxElement: toolboxEl as HTMLElement,
+      blockSettingsElement: settingsEl as HTMLElement,
+      toggleToolbox: (useHoveredBlock = true) => this.plusButtonClicked(useHoveredBlock),
+      toggleBlockSettings: (useHoveredBlock = true) => this.settingsTogglerClicked(useHoveredBlock),
+      isToolboxOpen: () => this.toolboxInstance?.opened ?? false,
+      isBlockSettingsOpen: () => this.Editor.BlockSettings.opened,
+    };
 
-    tooltip.onHover(this.nodes.plusButton, tooltipContent, {
-      hidingDelay: 400,
-    });
-
-    /**
-     * Fill Actions Zone:
-     *  - Settings Toggler
-     *  - Remove Block Button
-     *  - Settings Panel
-     */
-    this.nodes.settingsToggler = $.make('span', this.CSS.settingsToggler, {
-      innerHTML: IconMenu,
-    });
-
-    $.append(this.nodes.actions, this.nodes.settingsToggler);
-
-    const blockTunesTooltip = $.make('div');
-    const blockTunesTooltipEl = $.text(I18n.ui(I18nInternalNS.ui.blockTunes.toggler, 'Click to tune'));
-    const slashRealKey = await getKeyboardKeyForCode('Slash', '/');
-
-    blockTunesTooltip.appendChild(blockTunesTooltipEl);
-    blockTunesTooltip.appendChild($.make('div', this.CSS.plusButtonShortcut, {
-      textContent: beautifyShortcut(`CMD + ${slashRealKey}`),
-    }));
-
-    tooltip.onHover(this.nodes.settingsToggler, blockTunesTooltip, {
-      hidingDelay: 400,
-    });
-
-    /**
-     * Appending Toolbar components to itself
-     */
-    $.append(this.nodes.actions, this.makeToolbox());
-    $.append(this.nodes.actions, this.Editor.BlockSettings.getElement());
+    this.plugin.render(pluginContext);
 
     /**
      * Append toolbar to the Editor
@@ -540,14 +501,19 @@ export default class Toolbar extends Module<ToolbarNodes> {
 
 
   /**
-   * Handler for Plus Button
+   * Handler for Plus Button — called by plugin via ctx.toggleToolbox()
+   *
+   * @param useHoveredBlock - if true, sets currentBlock to hoveredBlock before toggling.
+   *                          Set to false when the caret already points to the correct block (e.g. VK-style toolbar).
    */
-  private plusButtonClicked(): void {
-    /**
-     * We need to update Current Block because user can click on the Plus Button (thanks to appearing by hover) without any clicks on editor
-     * In this case currentBlock will point last block
-     */
-    this.Editor.BlockManager.currentBlock = this.hoveredBlock;
+  private plusButtonClicked(useHoveredBlock = true): void {
+    if (useHoveredBlock && this.hoveredBlock) {
+      /**
+       * We need to update Current Block because user can click on the Plus Button (thanks to appearing by hover) without any clicks on editor
+       * In this case currentBlock will point last block
+       */
+      this.Editor.BlockManager.currentBlock = this.hoveredBlock;
+    }
 
     this.toolboxInstance?.toggle();
   }
@@ -556,28 +522,6 @@ export default class Toolbar extends Module<ToolbarNodes> {
    * Enable bindings
    */
   private enableModuleBindings(): void {
-    /**
-     * Settings toggler
-     *
-     * mousedown is used because on click selection is lost in Safari and FF
-     */
-    this.readOnlyMutableListeners.on(this.nodes.settingsToggler, 'mousedown', (e) => {
-      /**
-       * Stop propagation to prevent block selection clearance
-       *
-       * @see UI.documentClicked
-       */
-      e.stopPropagation();
-
-      this.settingsTogglerClicked();
-
-      if (this.toolboxInstance?.opened) {
-        this.toolboxInstance.close();
-      }
-
-      tooltip.hide(true);
-    }, true);
-
     /**
      * Subscribe to the 'block-hovered' event if current view is not mobile
      *
@@ -608,19 +552,29 @@ export default class Toolbar extends Module<ToolbarNodes> {
   }
 
   /**
-   * Clicks on the Block Settings toggler
+   * Clicks on the Block Settings toggler — called by plugin via ctx.toggleBlockSettings()
+   *
+   * @param useHoveredBlock - if true, uses hoveredBlock for settings.
+   *                          Set to false to use the current caret block.
    */
-  private settingsTogglerClicked(): void {
-    /**
-     * We need to update Current Block because user can click on toggler (thanks to appearing by hover) without any clicks on editor
-     * In this case currentBlock will point last block
-     */
-    this.Editor.BlockManager.currentBlock = this.hoveredBlock;
+  private settingsTogglerClicked(useHoveredBlock = true): void {
+    const targetBlock = useHoveredBlock && this.hoveredBlock
+      ? this.hoveredBlock
+      : this.Editor.BlockManager.currentBlock;
+
+    this.Editor.BlockManager.currentBlock = targetBlock;
 
     if (this.Editor.BlockSettings.opened) {
       this.Editor.BlockSettings.close();
     } else {
-      this.Editor.BlockSettings.open(this.hoveredBlock);
+      this.Editor.BlockSettings.open(targetBlock);
+    }
+
+    /**
+     * Close toolbox if it's open
+     */
+    if (this.toolboxInstance?.opened) {
+      this.toolboxInstance.close();
     }
   }
 
@@ -652,6 +606,10 @@ export default class Toolbar extends Module<ToolbarNodes> {
    * It is used in Read-Only mode
    */
   private destroy(): void {
+    if (this.plugin) {
+      this.plugin.destroy();
+      this.plugin = null;
+    }
     this.removeAllNodes();
     if (this.toolboxInstance) {
       this.toolboxInstance.destroy();

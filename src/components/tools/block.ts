@@ -143,6 +143,14 @@ export default class BlockToolAdapter extends BaseToolAdapter<ToolType.Block, IB
   }
 
   /**
+   * Returns true if tool should be hidden from the Toolbox (plus button)
+   * while still being available in the "Convert to" menu
+   */
+  public get toolboxHidden(): boolean {
+    return this.config[UserSettings.ToolboxHidden] === true;
+  }
+
+  /**
    * Returns enabled inline tools for Tool
    */
   public get enabledInlineTools(): boolean | string[] {

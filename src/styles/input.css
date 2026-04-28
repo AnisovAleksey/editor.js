@@ -1,8 +1,8 @@
 .cdx-search-field {
   --icon-margin-right: 10px;
 
-  background: #F8F8F8;
-  border: 1px solid rgba(226,226,229,0.20);
+  background: var(--editor-bg-hover);
+  border: 1px solid var(--editor-border-input);
   border-radius: 6px;
   padding: 2px;
   display: grid;

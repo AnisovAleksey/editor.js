@@ -46,6 +46,11 @@ interface BlockToolAdapter extends BaseToolAdapter<ToolType.Block, BlockTool>{
   toolbox: ToolboxConfigEntry[] | undefined;
 
   /**
+   * Returns true if tool should be hidden from the Toolbox (plus button)
+   */
+  toolboxHidden: boolean;
+
+  /**
    * Returns Tool conversion configuration
    */
   conversionConfig: ConversionConfig | undefined;

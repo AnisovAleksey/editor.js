@@ -292,7 +292,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
     this.tools.forEach((tool) => {
       const toolToolboxSettings = tool.toolbox;
 
-      if (toolToolboxSettings) {
+      if (toolToolboxSettings && !tool.toolboxHidden) {
         result.push(tool);
       }
     });

@@ -7,36 +7,36 @@
 
 :root {
   /**
-   * Selection color
+   * Selection color — aliases for backward compat with third-party tools
    */
-  --selectionColor: #e1f2ff;
-  --inlineSelectionColor: #d4ecff;
+  --selectionColor: var(--editor-selection, #e1f2ff);
+  --inlineSelectionColor: var(--editor-inline-selection, #d4ecff);
 
   /**
    * Toolbar buttons
    */
-  --bg-light: #eff2f5;
+  --bg-light: var(--editor-bg-light, #eff2f5);
 
   /**
    * All gray texts: placeholders, settings
    */
-  --grayText: #707684;
+  --grayText: var(--editor-text-secondary, #707684);
 
   /**
    * Gray icons hover
    */
-  --color-dark: #1D202B;
+  --color-dark: var(--editor-text, #1D202B);
 
   /**
    * Blue icons
    */
-  --color-active-icon: #388AE5;
+  --color-active-icon: var(--editor-active, #388AE5);
 
   /**
    * Gray border, loaders
    * @deprecated — use --color-line-gray instead
    */
-  --color-gray-border: rgba(201, 201, 204, 0.48);
+  --color-gray-border: var(--editor-border-icon, rgba(201, 201, 204, 0.48));
 
   /**
    * Block content width
@@ -68,13 +68,13 @@
    */
   --block-padding-vertical: 0.4em;
 
-  --color-line-gray: #EFF0F1;
+  --color-line-gray: var(--editor-border, #EFF0F1);
 
   --overlay-pane {
     position: absolute;
-    background-color: #FFFFFF;
-    border: 1px solid #E8E8EB;
-    box-shadow: 0 3px 15px -3px rgba(13,20,33,0.13);
+    background-color: var(--editor-bg);
+    border: 1px solid var(--editor-border);
+    box-shadow: 0 3px 15px -3px var(--editor-shadow-overlay);
     border-radius: 6px;
     z-index: 2;
 
@@ -95,13 +95,13 @@
   };
 
   --button-focused {
-    box-shadow: inset 0 0 0px 1px rgba(7, 161, 227, 0.08);
-    background: rgba(34, 186, 255, 0.08) !important;
+    box-shadow: inset 0 0 0px 1px var(--editor-shadow-focus);
+    background: var(--editor-focus-bg) !important;
   };
 
   --button-active {
-    background: rgba(56, 138, 229, 0.1);
-    color:  var(--color-active-icon);
+    background: var(--editor-active-bg);
+    color: var(--color-active-icon);
   };
 
   --button-disabled {
@@ -114,7 +114,8 @@
    * Styles for Toolbox Buttons and Plus Button
    */
   --toolbox-button {
-    color: var(--color-dark);
+    color: var(--editor-toolbar-btn-color);
+    background: var(--editor-toolbar-btn-bg);
     cursor: pointer;
     width: var(--toolbox-buttons-size);
     height: var(--toolbox-buttons-size);
@@ -131,12 +132,13 @@
 
     @media (--can-hover) {
       &:hover {
-        background-color: var(--bg-light);
+        background-color: var(--editor-toolbar-btn-hover-bg);
+        color: var(--editor-toolbar-btn-hover-color);
       }
     }
 
     &--active {
-      background-color: var(--bg-light);
+      background-color: var(--editor-toolbar-btn-hover-bg);
       animation: bounceIn 0.75s 1;
       animation-fill-mode: forwards;
     }
@@ -149,11 +151,11 @@
     display: inline-flex;
     width: var(--toolbox-buttons-size);
     height: var(--toolbox-buttons-size);
-    box-shadow: 0 0 0 1px var(--color-gray-border);
+    box-shadow: 0 0 0 1px var(--editor-border-icon);
     border-radius: 5px;
     align-items: center;
     justify-content: center;
-    background: #fff;
+    background: var(--editor-bg);
     box-sizing: content-box;
     flex-shrink: 0;
     margin-right: 10px;
