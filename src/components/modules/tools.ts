@@ -4,8 +4,11 @@ import * as _ from '../utils';
 import type { SanitizerConfig, ToolConfig, ToolConstructable, ToolSettings } from '../../../types';
 import BoldInlineTool from '../inline-tools/inline-tool-bold';
 import ItalicInlineTool from '../inline-tools/inline-tool-italic';
+import StrikethroughInlineTool from '../inline-tools/inline-tool-strikethrough';
 import LinkInlineTool from '../inline-tools/inline-tool-link';
 import ConvertInlineTool from '../inline-tools/inline-tool-convert';
+import { HeadingH2ConvertTool, HeadingH3ConvertTool } from '../inline-tools/inline-tool-convert-heading';
+import QuoteConvertInlineTool from '../inline-tools/inline-tool-convert-quote';
 import Stub from '../../tools/stub';
 import ToolsFactory from '../tools/factory';
 import type InlineToolAdapter from '../tools/inline';
@@ -193,6 +196,22 @@ export default class Tools extends Module {
         class: ItalicInlineTool,
         isInternal: true,
       },
+      strikethrough: {
+        class: StrikethroughInlineTool,
+        isInternal: true,
+      },
+      convertHeadingH2: {
+        class: HeadingH2ConvertTool,
+        isInternal: true,
+      },
+      convertHeadingH3: {
+        class: HeadingH3ConvertTool,
+        isInternal: true,
+      },
+      convertQuote: {
+        class: QuoteConvertInlineTool,
+        isInternal: true,
+      },
       paragraph: {
         class: Paragraph,
         inlineToolbar: true,
@@ -319,7 +338,7 @@ export default class Tools extends Module {
     if (tool.enabledInlineTools === true) {
       tool.inlineTools = new ToolsCollection<InlineToolAdapter>(
         Array.isArray(this.config.inlineToolbar)
-          ? this.config.inlineToolbar.map(name => [name, this.inlineTools.get(name)])
+          ? this.config.inlineToolbar.filter(name => this.inlineTools.has(name)).map(name => [name, this.inlineTools.get(name)])
           /**
            * If common settings is 'true' or not specified (will be set as true at core.ts), get the default order
            */
@@ -334,8 +353,7 @@ export default class Tools extends Module {
      */
     if (Array.isArray(tool.enabledInlineTools)) {
       tool.inlineTools = new ToolsCollection<InlineToolAdapter>(
-        /** Prepend ConvertTo Inline Tool */
-        ['convertTo', ...tool.enabledInlineTools].map(name => [name, this.inlineTools.get(name)])
+        tool.enabledInlineTools.map(name => [name, this.inlineTools.get(name)])
       );
     }
   }

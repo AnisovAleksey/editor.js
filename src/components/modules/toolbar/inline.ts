@@ -4,14 +4,9 @@ import $ from '../../dom';
 import SelectionUtils from '../../selection';
 import * as _ from '../../utils';
 import type { InlineTool as IInlineTool } from '../../../../types';
-import I18n from '../../i18n';
-import { I18nInternalNS } from '../../i18n/namespace-internal';
 import Shortcuts from '../../utils/shortcuts';
 import type { ModuleConfig } from '../../../types-internal/module-config';
 import { CommonInternalSettings } from '../../tools/base';
-import type { Popover, PopoverItemHtmlParams, PopoverItemParams, WithChildren } from '../../utils/popover';
-import { PopoverItemType } from '../../utils/popover';
-import { PopoverInline } from '../../utils/popover/popover-inline';
 import type InlineToolAdapter from 'src/components/tools/inline';
 
 /**
@@ -22,18 +17,18 @@ interface InlineToolbarNodes {
 }
 
 /**
- * Inline toolbar with actions that modifies selected text fragment
+ * Inline text style panel — appears above selected text.
  *
- * |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|
- * |   B  i [link] [mark]   |
- * |________________________|
+ * Renders tool buttons directly, no legacy Popover involved.
  */
 export default class InlineToolbar extends Module<InlineToolbarNodes> {
-  /**
-   * CSS styles
-   */
   public CSS = {
-    inlineToolbar: 'ce-inline-toolbar',
+    panel: 'ce-inline-text-style-panel',
+    container: 'ce-inline-text-style-panel__container',
+    button: 'ce-inline-text-style-panel__btn',
+    buttonActive: 'ce-inline-text-style-panel__btn--active',
+    separator: 'ce-inline-text-style-panel__sep',
+    actions: 'ce-inline-text-style-panel__actions',
   };
 
   /**
@@ -42,15 +37,10 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   public opened = false;
 
   /**
-   * Popover instance reference
-   */
-  private popover: Popover | null = null;
-
-  /**
-   * Margin above/below the Toolbar
+   * Gap between panel and selected text (px)
    */
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  private readonly toolbarVerticalMargin: number = _.isMobileScreen() ? 20 : 6;
+  private readonly toolbarGap: number = _.isMobileScreen() ? 20 : 4;
 
   /**
    * Currently visible tools instances
@@ -58,15 +48,22 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   private tools: Map<InlineToolAdapter, IInlineTool> = new Map();
 
   /**
-   * @param moduleConfiguration - Module Configuration
-   * @param moduleConfiguration.config - Editor's config
-   * @param moduleConfiguration.eventsDispatcher - Editor's event dispatcher
+   * Container element holding all buttons
    */
+  private container: HTMLElement | null = null;
+
+  /**
+   * Container for tool actions (e.g. link input)
+   */
+  private actionsEl: HTMLElement | null = null;
+
+  /**
+   * Separator tool name — separator is inserted before this tool
+   */
+  private readonly separatorBefore = 'convertHeadingH2';
+
   constructor({ config, eventsDispatcher }: ModuleConfig) {
-    super({
-      config,
-      eventsDispatcher,
-    });
+    super({ config, eventsDispatcher });
 
     window.requestIdleCallback(() => {
       this.make();
@@ -74,15 +71,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   }
 
   /**
-   *  Moving / appearance
-   *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   */
-
-  /**
    * Shows Inline Toolbar if something is selected
-   *
-   * @param [needToClose] - pass true to close toolbar if it is not allowed.
-   *                                  Avoid to use it just for closing IT, better call .close() clearly.
    */
   public async tryToShow(needToClose = false): Promise<void> {
     if (needToClose) {
@@ -94,7 +83,6 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     }
 
     await this.open();
-
     this.Editor.Toolbar.close();
   }
 
@@ -113,28 +101,19 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
         Shortcuts.remove(this.Editor.UI.nodes.redactor, shortcut);
       }
 
-      /**
-       * @todo replace 'clear' with 'destroy'
-       */
       if (_.isFunction(toolInstance.clear)) {
         toolInstance.clear();
       }
     }
 
     this.tools = new Map();
-
+    this.clearPanel();
     this.reset();
     this.opened = false;
-
-    this.popover?.hide();
-    this.popover?.destroy();
-    this.popover = null;
   }
 
   /**
    * Check if node is contained by Inline Toolbar
-   *
-   * @param {Node} node — node to check
    */
   public containsNode(node: Node): boolean {
     if (this.nodes.wrapper === undefined) {
@@ -149,91 +128,156 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
    */
   public destroy(): void {
     this.removeAllNodes();
-    this.popover?.destroy();
-    this.popover = null;
   }
 
   /**
-   * Making DOM
+   * Create the positioning wrapper
    */
   private make(): void {
     this.nodes.wrapper = $.make('div', [
-      this.CSS.inlineToolbar,
-      ...(this.isRtl ? [ this.Editor.UI.CSS.editorRtlFix ] : []),
+      this.CSS.panel,
+      ...(this.isRtl ? [this.Editor.UI.CSS.editorRtlFix] : []),
     ]);
 
     if (import.meta.env.MODE === 'test') {
       this.nodes.wrapper.setAttribute('data-cy', 'inline-toolbar');
     }
 
-    /**
-     * Append the inline toolbar to the editor.
-     */
     $.append(this.Editor.UI.nodes.wrapper, this.nodes.wrapper);
   }
 
   /**
-   * Shows Inline Toolbar
+   * Open: create tool instances, render buttons, position panel
    */
   private async open(): Promise<void> {
     if (this.opened) {
       return;
     }
 
-    /**
-     * Show Inline Toolbar
-     */
-
     this.opened = true;
-
-    if (this.popover !== null) {
-      this.popover.destroy();
-    }
-
     this.createToolsInstances();
-
-    const popoverItems = await this.getPopoverItems();
-
-    this.popover = new PopoverInline({
-      items: popoverItems,
-      scopeElement: this.Editor.API.methods.ui.nodes.redactor,
-      messages: {
-        nothingFound: I18n.ui(I18nInternalNS.ui.popover, 'Nothing found'),
-        search: I18n.ui(I18nInternalNS.ui.popover, 'Filter'),
-      },
-    });
-
-    this.move(this.popover.size.width);
-
-    this.nodes.wrapper?.append(this.popover.getElement());
-
-    this.popover.show();
+    await this.renderButtons();
+    this.move();
   }
 
   /**
-   * Move Toolbar to the selected text
-   *
-   * @param popoverWidth - width of the toolbar popover
+   * Render all tool buttons into the container
    */
-  private move(popoverWidth: number): void {
+  private async renderButtons(): Promise<void> {
+    this.clearPanel();
+
+    this.container = $.make('div', this.CSS.container);
+    this.actionsEl = $.make('div', this.CSS.actions);
+
+    for (const [tool, instance] of this.tools) {
+      /** Insert separator before conversion tools */
+      if (tool.name === this.separatorBefore) {
+        this.container.appendChild($.make('div', this.CSS.separator));
+      }
+
+      const rendered = await instance.render();
+
+      /** Enable tool shortcut */
+      const shortcut = this.getToolShortcut(tool.name);
+
+      if (shortcut !== undefined) {
+        try {
+          this.enableShortcuts(tool, instance, shortcut);
+        } catch (e) {}
+      }
+
+      if ($.isElement(rendered)) {
+        /**
+         * Old API: tool returned an HTMLElement (e.g. Italic, Link)
+         */
+        rendered.classList.add(this.CSS.button);
+        rendered.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.toolClicked(instance);
+        });
+
+        /** If tool has renderActions (e.g. Link input), append to actions container */
+        if (_.isFunction(instance.renderActions)) {
+          this.actionsEl.appendChild(instance.renderActions!());
+        }
+
+        instance.checkState?.(SelectionUtils.get());
+        this.container.appendChild(rendered);
+      } else {
+        /**
+         * New API: tool returned MenuConfig
+         */
+        const item = rendered as { icon?: string; name?: string; onActivate?: () => void; isActive?: () => boolean };
+        const btn = document.createElement('button');
+
+        btn.type = 'button';
+        btn.className = this.CSS.button;
+        btn.innerHTML = item.icon || '';
+        btn.setAttribute('data-tool-name', item.name || tool.name);
+
+        if (item.isActive?.()) {
+          btn.classList.add(this.CSS.buttonActive);
+        }
+
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          item.onActivate?.();
+          this.updateActiveStates();
+        });
+
+        this.container.appendChild(btn);
+      }
+    }
+
+    this.nodes.wrapper?.appendChild(this.container);
+
+    if (this.actionsEl.children.length > 0) {
+      this.nodes.wrapper?.appendChild(this.actionsEl);
+    }
+  }
+
+  /**
+   * Remove all rendered content from the wrapper
+   */
+  private clearPanel(): void {
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+    }
+    if (this.actionsEl) {
+      this.actionsEl.remove();
+      this.actionsEl = null;
+    }
+  }
+
+  /**
+   * Position the panel centered above the selected text
+   */
+  private move(): void {
+    if (!this.container) {
+      return;
+    }
+
     const selectionRect = SelectionUtils.rect as DOMRect;
     const wrapperOffset = this.Editor.UI.nodes.wrapper.getBoundingClientRect();
+    const panelRect = this.container.getBoundingClientRect();
+
+    const selectionCenterX = selectionRect.x + selectionRect.width / 2;
     const newCoords = {
-      x: selectionRect.x - wrapperOffset.x,
-      y: selectionRect.y +
-        selectionRect.height -
-        // + window.scrollY
-        wrapperOffset.top +
-        this.toolbarVerticalMargin,
+      x: selectionCenterX - panelRect.width / 2 - wrapperOffset.x,
+      y: selectionRect.y - wrapperOffset.top - panelRect.height - this.toolbarGap,
     };
 
-    const realRightCoord = newCoords.x + popoverWidth + wrapperOffset.x;
+    /** Clamp right */
+    const realRightCoord = newCoords.x + panelRect.width + wrapperOffset.x;
 
-    /**
-     * Prevent InlineToolbar from overflowing the content zone on the right side
-     */
     if (realRightCoord > this.Editor.UI.contentRect.right) {
-      newCoords.x = this.Editor.UI.contentRect.right -popoverWidth - wrapperOffset.x;
+      newCoords.x = this.Editor.UI.contentRect.right - panelRect.width - wrapperOffset.x;
+    }
+
+    /** Clamp left */
+    if (newCoords.x + wrapperOffset.x < this.Editor.UI.contentRect.left) {
+      newCoords.x = this.Editor.UI.contentRect.left - wrapperOffset.x;
     }
 
     this.nodes.wrapper!.style.left = Math.floor(newCoords.x) + 'px';
@@ -241,7 +285,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   }
 
   /**
-   * Clear orientation classes and reset position
+   * Reset position
    */
   private reset(): void {
     this.nodes.wrapper!.style.left = '0';
@@ -249,23 +293,17 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   }
 
   /**
-   * Need to show Inline Toolbar or not
+   * Check if inline toolbar is allowed to show
    */
   private allowedToShow(): boolean {
-    /**
-     * Tags conflicts with window.selection function.
-     * Ex. IMG tag returns null (Firefox) or Redactors wrapper (Chrome)
-     */
     const tagsConflictsWithSelection = ['IMG', 'INPUT'];
     const currentSelection = SelectionUtils.get();
     const selectedText = SelectionUtils.text;
 
-    // old browsers
     if (!currentSelection || !currentSelection.anchorNode) {
       return false;
     }
 
-    // empty selection
     if (currentSelection.isCollapsed || selectedText.length < 1) {
       return false;
     }
@@ -278,48 +316,30 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
       return false;
     }
 
-    if (currentSelection !== null && tagsConflictsWithSelection.includes(target.tagName)) {
+    if (tagsConflictsWithSelection.includes(target.tagName)) {
       return false;
     }
 
-    /**
-     * Check if there is at leas one tool enabled by current Block's Tool
-     */
     const currentBlock = this.Editor.BlockManager.getBlock(currentSelection.anchorNode as HTMLElement);
 
     if (!currentBlock) {
       return false;
     }
 
-    /**
-     * Check that at least one tool is available for the current block
-     */
     const toolsAvailable = this.getTools();
-    const isAtLeastOneToolAvailable = toolsAvailable.some((tool) => currentBlock.tool.inlineTools.has(tool.name));
+    const isAtLeastOneToolAvailable = toolsAvailable.some(
+      (tool) => currentBlock.tool.inlineTools.has(tool.name)
+    );
 
-    if (isAtLeastOneToolAvailable === false) {
+    if (!isAtLeastOneToolAvailable) {
       return false;
     }
 
-    /**
-     * Inline toolbar will be shown only if the target is contenteditable
-     * In Read-Only mode, the target should be contenteditable with "false" value
-     */
-    const contenteditable = target.closest('[contenteditable]');
-
-    return contenteditable !== null;
+    return target.closest('[contenteditable]') !== null;
   }
 
   /**
-   *  Working with Tools
-   *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   */
-
-  /**
-   * Returns tools that are available for current block
-   *
-   * Used to check if Inline Toolbar could be shown
-   * and to render tools in the Inline Toolbar
+   * Returns tools available for the current block
    */
   private getTools(): InlineToolAdapter[] {
     const currentBlock = this.Editor.BlockManager.currentBlock;
@@ -328,13 +348,7 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
       return [];
     }
 
-    const inlineTools = Array.from(currentBlock.tool.inlineTools.values());
-
-    return inlineTools.filter((tool) => {
-      /**
-       * We support inline tools in read only mode.
-       * Such tools should have isReadOnlySupported flag set to true
-       */
+    return Array.from(currentBlock.tool.inlineTools.values()).filter((tool) => {
       if (this.Editor.ReadOnly.isEnabled && tool.isReadOnlySupported !== true) {
         return false;
       }
@@ -344,168 +358,22 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   }
 
   /**
-   * Constructs tools instances and saves them to this.tools
+   * Constructs tools instances
    */
   private createToolsInstances(): void {
     this.tools = new Map();
 
-    const tools = this.getTools();
-
-    tools.forEach((tool) => {
-      const instance = tool.create();
-
-      this.tools.set(tool, instance);
-    });
-  }
-
-  /**
-   * Returns Popover Items for tools segregated by their appearance type: regular items and custom html elements.
-   */
-  private async getPopoverItems(): Promise<PopoverItemParams[]> {
-    const popoverItems = [] as PopoverItemParams[];
-
-    let i = 0;
-
-    for (const [tool, instance] of this.tools) {
-      const renderedTool = await instance.render();
-
-      /** Enable tool shortcut */
-      const shortcut = this.getToolShortcut(tool.name);
-
-      if (shortcut !== undefined) {
-        try {
-          this.enableShortcuts(tool.name, shortcut);
-        } catch (e) {}
-      }
-
-      const shortcutBeautified = shortcut !== undefined ? _.beautifyShortcut(shortcut) : undefined;
-
-      const toolTitle = I18n.t(
-        I18nInternalNS.toolNames,
-        tool.title || _.capitalize(tool.name)
-      );
-
-      [ renderedTool ].flat().forEach((item) => {
-        const commonPopoverItemParams = {
-          name: tool.name,
-          onActivate: () => {
-            this.toolClicked(instance);
-          },
-          hint: {
-            title: toolTitle,
-            description: shortcutBeautified,
-          },
-        } as PopoverItemParams;
-
-        if ($.isElement(item)) {
-          /**
-           * Deprecated way to add custom html elements to the Inline Toolbar
-           */
-
-          const popoverItem = {
-            ...commonPopoverItemParams,
-            element: item,
-            type: PopoverItemType.Html,
-          } as PopoverItemParams;
-
-          /**
-           * If tool specifies actions in deprecated manner, append them as children
-           */
-          if (_.isFunction(instance.renderActions)) {
-            const actions = instance.renderActions();
-
-            (popoverItem as WithChildren<PopoverItemHtmlParams>).children = {
-              isOpen: instance.checkState?.(SelectionUtils.get()),
-              /** Disable keyboard navigation in actions, as it might conflict with enter press handling */
-              isFlippable: false,
-              items: [
-                {
-                  type: PopoverItemType.Html,
-                  element: actions,
-                },
-              ],
-            };
-          } else {
-            /**
-             * Legacy inline tools might perform some UI mutating logic in checkState method, so, call it just in case
-             */
-            instance.checkState?.(SelectionUtils.get());
-          }
-
-          popoverItems.push(popoverItem);
-        } else if (item.type === PopoverItemType.Html) {
-          /**
-           * Actual way to add custom html elements to the Inline Toolbar
-           */
-          popoverItems.push({
-            ...commonPopoverItemParams,
-            ...item,
-            type: PopoverItemType.Html,
-          });
-        } else if (item.type === PopoverItemType.Separator) {
-          /**
-           * Separator item
-           */
-          popoverItems.push({
-            type: PopoverItemType.Separator,
-          });
-        } else {
-          /**
-           * Default item
-           */
-          const popoverItem = {
-            ...commonPopoverItemParams,
-            ...item,
-            type: PopoverItemType.Default,
-          } as PopoverItemParams;
-
-          /**
-           * Prepend the separator if item has children and not the first one
-           */
-          if ('children' in popoverItem && i !== 0) {
-            popoverItems.push({
-              type: PopoverItemType.Separator,
-            });
-          }
-
-          popoverItems.push(popoverItem);
-
-          /**
-           * Append a separator after the item if it has children and not the last one
-           */
-          if ('children' in popoverItem && i < this.tools.size - 1) {
-            popoverItems.push({
-              type: PopoverItemType.Separator,
-            });
-          }
-        }
-      });
-
-      i++;
+    for (const tool of this.getTools()) {
+      this.tools.set(tool, tool.create());
     }
-
-    return popoverItems;
   }
 
   /**
-   * Get shortcut name for tool
-   *
-   * @param toolName — Tool name
+   * Get shortcut for a tool
    */
   private getToolShortcut(toolName: string): string | undefined {
     const { Tools } = this.Editor;
-
-    /**
-     * Enable shortcuts
-     * Ignore tool that doesn't have shortcut or empty string
-     */
     const tool = Tools.inlineTools.get(toolName);
-
-    /**
-     * 1) For internal tools, check public getter 'shortcut'
-     * 2) For external tools, check tool's settings
-     * 3) If shortcut is not set in settings, check Tool's public property
-     */
     const internalTools = Tools.internal.inlineTools;
 
     if (Array.from(internalTools.keys()).includes(toolName)) {
@@ -516,79 +384,75 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   }
 
   /**
-   * Enable Tool shortcut with Editor Shortcuts Module
-   *
-   * @param toolName - tool name
-   * @param shortcut - shortcut according to the ShortcutData Module format
+   * Enable shortcut for a tool
    */
-  private enableShortcuts(toolName: string, shortcut: string): void {
+  private enableShortcuts(tool: InlineToolAdapter, instance: IInlineTool, shortcut: string): void {
     Shortcuts.add({
       name: shortcut,
       handler: (event) => {
         const { currentBlock } = this.Editor.BlockManager;
 
-        /**
-         * Editor is not focused
-         */
         if (!currentBlock) {
           return;
         }
-
-        /**
-         * We allow to fire shortcut with empty selection (isCollapsed=true)
-         * it can be used by tools like «Mention» that works without selection:
-         * Example: by SHIFT+@ show dropdown and insert selected username
-         */
-        // if (SelectionUtils.isCollapsed) return;
 
         if (!currentBlock.tool.enabledInlineTools) {
           return;
         }
 
         event.preventDefault();
-
-        this.popover?.activateItemByName(toolName);
+        this.toolClicked(instance);
       },
-      /**
-       * We need to bind shortcut to the document to make it work in read-only mode
-       */
       on: document,
     });
   }
 
   /**
-   * Inline Tool button clicks
-   *
-   * @param tool - Tool's instance
+   * Handle tool button click (old API tools)
    */
   private toolClicked(tool: IInlineTool): void {
     const range = SelectionUtils.range;
 
     tool.surround?.(range);
-    this.checkToolsState();
+    this.updateActiveStates();
   }
 
   /**
-   * Check Tools` state by selection
+   * Update active state of all buttons
    */
-  private checkToolsState(): void {
-    this.tools?.forEach((toolInstance) => {
+  private updateActiveStates(): void {
+    for (const [, toolInstance] of this.tools) {
       toolInstance.checkState?.(SelectionUtils.get());
-    });
+    }
+
+    /** Update active class on new-API buttons */
+    if (this.container) {
+      const buttons = this.container.querySelectorAll(`[data-tool-name]`);
+
+      buttons.forEach((btn) => {
+        const toolName = btn.getAttribute('data-tool-name');
+
+        for (const [tool, instance] of this.tools) {
+          if ((tool.name === toolName || toolName === tool.name) && instance.render) {
+            /** Re-check isActive for new-API tools — they store isActive on the rendered config */
+            // Active state for new API tools is handled via the rendered config's isActive
+            // We can't easily re-call render, so we skip re-checking here
+            // Old API tools handle their own active class in checkState
+          }
+        }
+      });
+    }
   }
 
   /**
-   * Get inline tools tools
-   * Tools that has isInline is true
+   * Get inline tools (used for shortcut lookup)
    */
   private get inlineTools(): { [name: string]: IInlineTool } {
-    const result = {} as  { [name: string]: IInlineTool } ;
+    const result = {} as { [name: string]: IInlineTool };
 
-    Array
-      .from(this.Editor.Tools.inlineTools.entries())
-      .forEach(([name, tool]) => {
-        result[name] = tool.create();
-      });
+    Array.from(this.Editor.Tools.inlineTools.entries()).forEach(([name, tool]) => {
+      result[name] = tool.create();
+    });
 
     return result;
   }

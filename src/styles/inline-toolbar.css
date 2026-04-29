@@ -1,165 +1,95 @@
-.ce-inline-toolbar {
-  --y-offset: 8px;
-
-  /** Scoped variables — aliased to --editor-* theme variables */
-  --color-background-icon-active: var(--editor-active-bg);
-  --color-text-icon-active: var(--editor-active);
-  --color-text-primary: var(--editor-inline-tool-color);
-
+/**
+ * Inline text style panel — positioned above selected text.
+ * Self-contained styles, no dependency on popover CSS.
+ */
+.ce-inline-text-style-panel {
   position: absolute;
-  visibility: hidden;
-  transition: opacity 250ms ease;
-  will-change: opacity, left, top;
   top: 0;
   left: 0;
   z-index: 3;
-  opacity: 1;
-  background: var(--editor-inline-bg);
-  border: 1px solid var(--editor-inline-border);
-  box-shadow: 0 3px 15px -3px var(--editor-inline-shadow);
-
-  [hidden] {
-    display: none !important;
-  }
-
-  &__toggler-and-button-wrapper {
-    display: flex;
-    width: 100%;
-    padding: 0 6px;
-    border-right: 1px solid var(--editor-inline-separator);
-  }
-
-  &__buttons {
-    display: flex;
-  }
-
-  &__actions {
-  }
-
-  &__dropdown {
-    display: flex;
-    padding: 6px;
-    margin: 0 6px 0 -6px;
-    align-items: center;
-    cursor: pointer;
-    border-right: 1px solid var(--editor-inline-separator);
-    box-sizing: border-box;
-
-    @media (--can-hover) {
-      &:hover {
-        background: var(--editor-inline-tool-hover-bg);
-      }
-    }
-
-    &--hidden {
-      display: none;
-    }
-
-    &-content,
-    &-arrow {
-      display: flex;
-      svg {
-        width: var(--icon-size);
-        height: var(--icon-size);
-      }
-    }
-  }
-
-  &__shortcut {
-    opacity: 0.6;
-    word-spacing: -3px;
-    margin-top: 3px;
-  }
 }
 
-.ce-inline-tool {
-  color: var(--editor-inline-tool-color);
+.ce-inline-text-style-panel__container {
   display: flex;
-  justify-content: center;
   align-items: center;
+  background: var(--editor-inline-bg, var(--editor-bg, #fff));
+  border: 1px solid var(--editor-inline-border, var(--editor-border, #e8e8eb));
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 3px 15px -3px var(--editor-inline-shadow, rgba(13, 20, 33, 0.1));
+}
 
-  border: 0;
-  border-radius: 4px;
-  line-height: normal;
-  height: 100%;
-  padding: 0;
-  width: 28px;
-  background-color: transparent;
+.ce-inline-text-style-panel__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--editor-inline-tool-color, currentColor);
   cursor: pointer;
+  padding: 0;
+  transition: background 120ms ease;
 
-  @media (--mobile) {
-    width: 36px;
-    height: 36px;
-  }
-
-  @media (--can-hover) {
-    &:hover {
-      background-color: var(--editor-inline-tool-hover-bg);
-      color: var(--editor-inline-tool-hover-color);
-    }
-  }
-
-  svg {
-    display: block;
-    width: var(--icon-size);
-    height: var(--icon-size);
-
-    @media (--mobile) {
-      width: var(--icon-size--mobile);
-      height: var(--icon-size--mobile);
-    }
-  }
-
-  &--link {
-    .icon--unlink {
-      display: none;
-    }
-  }
-
-  &--unlink {
-    .icon--link {
-      display: none;
-    }
-    .icon--unlink {
-      display: inline-block;
-      margin-bottom: -1px;
-    }
-  }
-
-  &-input {
-    background: var(--editor-bg-hover);
-    border: 1px solid var(--editor-border-input);
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 14px;
-    line-height: 22px;
-
-    color: var(--editor-text);
-    outline: none;
-    margin: 0;
-    width: 100%;
-    box-sizing: border-box;
-    display: none;
-    font-weight: 500;
-    -webkit-appearance: none;
-    font-family: inherit;
-
-    @media (--mobile){
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    &::placeholder {
-      color: var(--editor-text-secondary);
-    }
-
-    &--showed {
-      display: block;
-    }
+  &:hover {
+    background: var(--editor-bg-hover, #f0f1f3);
   }
 
   &--active {
-    background: var(--color-background-icon-active);
-    color: var(--color-text-icon-active);
+    background: var(--editor-active-bg, #eff2fc);
+    color: var(--editor-active, #388ae5);
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+
+    /** Reset the global "path { stroke: currentColor }" from ui.css */
+    path {
+      stroke: unset;
+    }
+  }
+}
+
+.ce-inline-text-style-panel__sep {
+  width: 1px;
+  height: 20px;
+  background: var(--editor-inline-separator, var(--editor-border, #e8e8eb));
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.ce-inline-text-style-panel__actions {
+  padding: 0 4px 4px;
+}
+
+/**
+ * Link tool input (rendered by the tool itself, styled here)
+ */
+.ce-inline-tool-input {
+  background: var(--editor-bg-hover, #f5f5f5);
+  border: 1px solid var(--editor-border-input, var(--editor-border, #e8e8eb));
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--editor-text, #1d202b);
+  outline: none;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: none;
+  font-weight: 500;
+  -webkit-appearance: none;
+  font-family: inherit;
+
+  &::placeholder {
+    color: var(--editor-text-secondary, #707684);
+  }
+
+  &--showed {
+    display: block;
   }
 }

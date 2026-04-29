@@ -2,7 +2,8 @@ import SelectionUtils from '../selection';
 import * as _ from '../utils';
 import type { InlineTool, SanitizerConfig, API } from '../../../types';
 import type { Notifier, Toolbar, I18n, InlineToolbar } from '../../../types/api';
-import { IconLink, IconUnlink } from '@codexteam/icons';
+const IconLink = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="1.75" fill="none" d="m10 14 4-4"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" fill="none" d="m16.5 13.5c3-3 3.5-5.5 1.5-7.5s-4.5-1.5-7.5 1.5m-3 3c-3 3-3.5 5.5-1.5 7.5s4.5 1.5 7.5-1.5"/></svg>`;
+const IconUnlink = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="1.75" fill="none" d="m10 14 4-4"/><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" fill="none" d="m16.5 13.5c3-3 3.5-5.5 1.5-7.5s-4.5-1.5-7.5 1.5m-3 3c-3 3-3.5 5.5-1.5 7.5s4.5 1.5 7.5-1.5"/><line x1="4" y1="20" x2="20" y2="4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`;
 
 /**
  * Link Tool
