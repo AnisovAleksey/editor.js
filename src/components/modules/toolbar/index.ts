@@ -4,12 +4,9 @@ import * as _ from '../../utils';
 import type { ModuleConfig } from '../../../types-internal/module-config';
 import type Block from '../../block';
 import Toolbox, { ToolboxEvent } from '../../ui/toolbox';
-import { IconPlus } from '@codexteam/icons';
 import { BlockHovered } from '../../events/BlockHovered';
-import I18n from '../../i18n';
-import { I18nInternalNS } from '../../i18n/namespace-internal';
 import type { ToolbarPlugin, ToolbarPluginContext, ToolbarBlockInfo } from '../../../../types/configs/toolbar-plugin';
-import DefaultToolbarPlugin from './default-plugin';
+import VkToolbarPlugin from './vk-plugin';
 
 /**
  * @todo Tab on non-empty block should open Block Settings of the hoveredBlock (not where caret is set)
@@ -432,10 +429,10 @@ export default class Toolbar extends Module<ToolbarNodes> {
     $.append(this.nodes.actions, settingsEl);
 
     /**
-     * Initialize toolbar plugin
-     * Use custom plugin from config or fall back to DefaultToolbarPlugin
+     * Initialize toolbar plugin.
+     * VkToolbarPlugin is the bundled default; consumers can override via EditorConfig.toolbar.plugin.
      */
-    this.plugin = this.config.toolbar?.plugin ?? new DefaultToolbarPlugin();
+    this.plugin = this.config.toolbar?.plugin ?? new VkToolbarPlugin();
 
     const pluginContext: ToolbarPluginContext = {
       actionsContainer: this.nodes.actions!,
@@ -465,10 +462,6 @@ export default class Toolbar extends Module<ToolbarNodes> {
     this.toolboxInstance = new Toolbox({
       api: this.Editor.API.methods,
       tools: this.Editor.Tools.blockTools,
-      i18nLabels: {
-        filter: I18n.ui(I18nInternalNS.ui.popover, 'Filter'),
-        nothingFound: I18n.ui(I18nInternalNS.ui.popover, 'Nothing found'),
-      },
     });
 
     this.toolboxInstance.on(ToolboxEvent.Opened, () => {

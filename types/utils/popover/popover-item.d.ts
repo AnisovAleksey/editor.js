@@ -8,11 +8,6 @@ export { PopoverItemType } from './popover-item-type';
  */
 export interface PopoverItemChildren {
   /**
-   * True if children items should be searchable
-   */
-  searchable?: boolean;
-
-  /**
    * True if popover with children should be displayed instantly and not after item click/hover.
    * False by default.
    * Now is used only in the inline popover.

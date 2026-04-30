@@ -1,13 +1,11 @@
 import Flipper from '../../flipper';
 import { PopoverAbstract } from './popover-abstract';
 import type { PopoverItem, PopoverItemRenderParamsMap } from './components/popover-item';
-import { PopoverItemSeparator, css as popoverItemCls } from './components/popover-item';
+import { css as popoverItemCls } from './components/popover-item';
 import type { PopoverParams } from '@/types/utils/popover/popover';
 import { PopoverEvent } from '@/types/utils/popover/popover-event';
 import { keyCodes } from '../../utils';
 import { CSSVariables, css } from './popover.const';
-import type { SearchableItem } from './components/search-input';
-import { SearchInput, SearchInputEvent } from './components/search-input';
 import { cacheable } from '../../utils';
 import { PopoverItemDefault } from './components/popover-item';
 import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
@@ -77,10 +75,6 @@ export class PopoverDesktop extends PopoverAbstract {
 
     if (this.nodes.popoverContainer !== null) {
       this.listeners.on(this.nodes.popoverContainer, 'mouseover', (event: Event) => this.handleHover(event));
-    }
-
-    if (params.searchable) {
-      this.addSearch();
     }
 
     if (params.flippable !== false) {
@@ -254,11 +248,9 @@ export class PopoverDesktop extends PopoverAbstract {
    */
   protected showNestedPopoverForItem(item: PopoverItem): PopoverDesktop {
     this.nestedPopover = new PopoverDesktop({
-      searchable: item.isChildrenSearchable,
       items: item.children,
       nestingLevel: this.nestingLevel + 1,
       flippable: item.isChildrenFlippable,
-      messages: this.messages,
     });
 
     item.onChildrenOpen();
@@ -383,65 +375,4 @@ export class PopoverDesktop extends PopoverAbstract {
     focusedItem?.onFocus();
   };
 
-  /**
-   * Adds search to the popover
-   */
-  private addSearch(): void {
-    this.search = new SearchInput({
-      items: this.itemsDefault,
-      placeholder: this.messages.search,
-    });
-
-    this.search.on(SearchInputEvent.Search, this.onSearch);
-
-    const searchElement = this.search.getElement();
-
-    searchElement.classList.add(css.search);
-
-    this.nodes.popoverContainer.insertBefore(searchElement, this.nodes.popoverContainer.firstChild);
-  }
-
-  /**
-   * Handles input inside search field
-   *
-   * @param data - search input event data
-   * @param data.query - search query text
-   * @param data.result - search results
-   */
-  private onSearch = (data: { query: string, items: SearchableItem[] }): void => {
-    const isEmptyQuery = data.query === '';
-    const isNothingFound = data.items.length === 0;
-
-    this.items
-      .forEach((item) => {
-        let isHidden = false;
-
-        if (item instanceof PopoverItemDefault) {
-          isHidden = !data.items.includes(item);
-        } else if (item instanceof PopoverItemSeparator || item instanceof PopoverItemHtml) {
-          /** Should hide separators if nothing found message displayed or if there is some search query applied */
-          isHidden = isNothingFound || !isEmptyQuery;
-        }
-        item.toggleHidden(isHidden);
-      });
-    this.toggleNothingFoundMessage(isNothingFound);
-
-    /** List of elements available for keyboard navigation considering search query applied */
-    const flippableElements = data.query === '' ? this.flippableElements : data.items.map(item => (item as PopoverItem).getElement());
-
-    if (this.flipper?.isActivated) {
-      /** Update flipper items with only visible */
-      this.flipper.deactivate();
-      this.flipper.activate(flippableElements as HTMLElement[]);
-    }
-  };
-
-  /**
-   * Toggles nothing found message visibility
-   *
-   * @param isDisplayed - true if the message should be displayed
-   */
-  private toggleNothingFoundMessage(isDisplayed: boolean): void {
-    this.nodes.nothingFoundMessage.classList.toggle(css.nothingFoundMessageDisplayed, isDisplayed);
-  }
 }

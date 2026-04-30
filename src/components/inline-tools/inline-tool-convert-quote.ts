@@ -1,7 +1,11 @@
 import type { InlineTool, API } from '../../../types';
 import type { MenuConfig } from '../../../types/tools';
-import type { Blocks, Selection, Caret } from '../../../types/api';
+import type { Blocks } from '../../../types/api';
 import SelectionUtils from '../selection';
+import {
+  captureBlockSelectionOffsets,
+  applyBlockSelectionOffsets,
+} from '../utils/selection-offsets';
 
 /**
  * SVG icon for quote (double opening quotation marks, VK style)
@@ -19,13 +23,9 @@ export default class QuoteConvertInlineTool implements InlineTool {
   public static title = 'Quote';
 
   private readonly blocksAPI: Blocks;
-  private readonly selectionAPI: Selection;
-  private readonly caretAPI: Caret;
 
   constructor({ api }: { api: API }) {
     this.blocksAPI = api.blocks;
-    this.selectionAPI = api.selection;
-    this.caretAPI = api.caret;
   }
 
   public render(): MenuConfig {
@@ -40,21 +40,21 @@ export default class QuoteConvertInlineTool implements InlineTool {
 
         if (!currentBlock) return;
 
-        this.selectionAPI.setFakeBackground();
-        this.selectionAPI.save();
+        const offsets = captureBlockSelectionOffsets(currentBlock.holder);
 
         const isAlreadyQuote = currentBlock.name === 'quote';
-
         const targetTool = isAlreadyQuote ? 'paragraph' : 'quote';
+
         const newBlock = await this.blocksAPI.convert(
           currentBlock.id,
           targetTool
         );
 
-        this.caretAPI.setToBlock(newBlock, 'end');
+        const newBlockHolder = this.blocksAPI.getById(newBlock.id)?.holder ?? null;
 
-        this.selectionAPI.restore();
-        this.selectionAPI.removeFakeBackground();
+        if (newBlockHolder && offsets) {
+          applyBlockSelectionOffsets(newBlockHolder, offsets);
+        }
       },
       isActive: () => {
         const currentSelection = SelectionUtils.get();

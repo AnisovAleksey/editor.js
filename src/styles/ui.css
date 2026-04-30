@@ -78,10 +78,6 @@
     max-height: 100%;
   }
 
-  path {
-    stroke: currentColor;
-  }
-
 
   /**
   * Set color for native selection

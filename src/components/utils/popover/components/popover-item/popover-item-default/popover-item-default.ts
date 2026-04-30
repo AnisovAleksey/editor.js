@@ -1,5 +1,5 @@
 import Dom from '../../../../../dom';
-import { IconDotCircle, IconChevronRight } from '@codexteam/icons';
+import { IconDotCircle, IconChevronRight } from '../../../../../icons';
 import type {
   PopoverItemDefaultParams as PopoverItemDefaultParams,
   PopoverItemRenderParamsMap,

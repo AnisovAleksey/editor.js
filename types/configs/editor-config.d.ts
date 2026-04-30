@@ -110,7 +110,10 @@ export interface EditorConfig {
    * Toolbar customization settings
    */
   toolbar?: {
-    /** Custom toolbar plugin that controls toolbar buttons UI */
+    /**
+     * Custom toolbar plugin that controls toolbar buttons UI.
+     * Defaults to the bundled VkToolbarPlugin if omitted.
+     */
     plugin?: ToolbarPlugin;
   };
 

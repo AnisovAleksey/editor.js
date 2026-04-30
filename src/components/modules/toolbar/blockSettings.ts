@@ -2,8 +2,6 @@ import Module from '../../__module';
 import $ from '../../dom';
 import SelectionUtils from '../../selection';
 import type Block from '../../block';
-import I18n from '../../i18n';
-import { I18nInternalNS } from '../../i18n/namespace-internal';
 import type Flipper from '../../flipper';
 import type { MenuConfigItem } from '../../../../types/tools';
 import { resolveAliases } from '../../utils/resolve-aliases';
@@ -12,8 +10,6 @@ import { type Popover, PopoverDesktop, PopoverMobile, PopoverItemType } from '..
 import { PopoverEvent } from '@/types/utils/popover/popover-event';
 import { isMobileScreen } from '../../utils';
 import { EditorMobileLayoutToggled } from '../../events';
-import { IconReplace } from '@codexteam/icons';
-import { getConvertibleToolsForBlock } from '../../utils/blocks';
 
 /**
  * HTML Elements that used for BlockSettings
@@ -142,13 +138,8 @@ export default class BlockSettings extends Module<BlockSettingsNodes> {
     const PopoverClass = isMobileScreen() ? PopoverMobile : PopoverDesktop;
 
     this.popover = new PopoverClass({
-      searchable: true,
-      items: await this.getTunesItems(targetBlock, commonTunes, toolTunes),
+      items: this.getTunesItems(commonTunes, toolTunes),
       scopeElement: this.Editor.API.methods.ui.nodes.redactor,
-      messages: {
-        nothingFound: I18n.ui(I18nInternalNS.ui.popover, 'Nothing found'),
-        search: I18n.ui(I18nInternalNS.ui.popover, 'Filter'),
-      },
     });
 
     this.popover.on(PopoverEvent.Closed, this.onPopoverClose);
@@ -208,56 +199,16 @@ export default class BlockSettings extends Module<BlockSettingsNodes> {
 
   /**
    * Returns list of items to be displayed in block tunes menu.
-   * Merges tool specific tunes, conversion menu and common tunes in one list in predefined order
+   * Merges tool specific tunes and common tunes in one list in predefined order.
    *
-   * @param currentBlock –  block we are about to open block tunes for
    * @param commonTunes – common tunes
    * @param toolTunes - tool specific tunes
    */
-  private async getTunesItems(currentBlock: Block, commonTunes: MenuConfigItem[], toolTunes?: MenuConfigItem[]): Promise<PopoverItemParams[]> {
+  private getTunesItems(commonTunes: MenuConfigItem[], toolTunes?: MenuConfigItem[]): PopoverItemParams[] {
     const items = [] as MenuConfigItem[];
 
     if (toolTunes !== undefined && toolTunes.length > 0) {
       items.push(...toolTunes);
-      items.push({
-        type: PopoverItemType.Separator,
-      });
-    }
-
-    const allBlockTools = Array.from(this.Editor.Tools.blockTools.values());
-    const convertibleTools = await getConvertibleToolsForBlock(currentBlock, allBlockTools);
-    const convertToItems = convertibleTools.reduce((result, tool) => {
-      tool.toolbox.forEach((toolboxItem) => {
-        result.push({
-          icon: toolboxItem.icon,
-          title: I18n.t(I18nInternalNS.toolNames, toolboxItem.title),
-          name: tool.name,
-          closeOnActivate: true,
-          onActivate: async () => {
-            const { BlockManager, Caret, Toolbar } = this.Editor;
-
-            const newBlock = await BlockManager.convert(currentBlock, tool.name, toolboxItem.data);
-
-            Toolbar.close();
-
-            Caret.setToBlock(newBlock, Caret.positions.END);
-          },
-        });
-      });
-
-      return result;
-    }, []);
-
-    if (convertToItems.length > 0) {
-      items.push({
-        icon: IconReplace,
-        name: 'convert-to',
-        title: I18n.ui(I18nInternalNS.ui.popover, 'Convert to'),
-        children: {
-          searchable: true,
-          items: convertToItems,
-        },
-      });
       items.push({
         type: PopoverItemType.Separator,
       });

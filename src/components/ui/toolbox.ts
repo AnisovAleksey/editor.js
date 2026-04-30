@@ -52,11 +52,6 @@ export interface ToolboxEventMap {
 }
 
 /**
- * Available i18n dict keys that should be passed to the constructor
- */
-type ToolboxTextLabelsKeys = 'filter' | 'nothingFound';
-
-/**
  * Toolbox
  * This UI element contains list of Block Tools available to be inserted
  * It appears after click on the Plus Button
@@ -102,11 +97,6 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
   private tools: ToolsCollection<BlockToolAdapter>;
 
   /**
-   * Text labels used in the Toolbox. Should be passed from the i18n module
-   */
-  private i18nLabels: Record<ToolboxTextLabelsKeys, string>;
-
-  /**
    * Current module HTML Elements
    */
   private nodes: {
@@ -131,12 +121,11 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
    * @param options.api - Editor API methods
    * @param options.tools - Tools available to check whether some of them should be displayed at the Toolbox or not
    */
-  constructor({ api, tools, i18nLabels }: {api: API; tools: ToolsCollection<BlockToolAdapter>; i18nLabels: Record<ToolboxTextLabelsKeys, string>}) {
+  constructor({ api, tools }: {api: API; tools: ToolsCollection<BlockToolAdapter>}) {
     super();
 
     this.api = api;
     this.tools = tools;
-    this.i18nLabels = i18nLabels;
 
     this.enableShortcuts();
 
@@ -246,11 +235,6 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
 
     this.popover = new PopoverClass({
       scopeElement: this.api.ui.nodes.redactor,
-      searchable: true,
-      messages: {
-        nothingFound: this.i18nLabels.nothingFound,
-        search: this.i18nLabels.filter,
-      },
       items: this.toolboxItemsToBeDisplayed,
     });
 

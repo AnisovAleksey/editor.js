@@ -6,9 +6,9 @@ import BoldInlineTool from '../inline-tools/inline-tool-bold';
 import ItalicInlineTool from '../inline-tools/inline-tool-italic';
 import StrikethroughInlineTool from '../inline-tools/inline-tool-strikethrough';
 import LinkInlineTool from '../inline-tools/inline-tool-link';
-import ConvertInlineTool from '../inline-tools/inline-tool-convert';
-import { HeadingH2ConvertTool, HeadingH3ConvertTool } from '../inline-tools/inline-tool-convert-heading';
+import { HeadingH2ConvertTool, HeadingH3ConvertTool, HeadingH4ConvertTool } from '../inline-tools/inline-tool-convert-heading';
 import QuoteConvertInlineTool from '../inline-tools/inline-tool-convert-quote';
+import { ListUnorderedConvertTool, ListOrderedConvertTool } from '../inline-tools/inline-tool-convert-list';
 import Stub from '../../tools/stub';
 import ToolsFactory from '../tools/factory';
 import type InlineToolAdapter from '../tools/inline';
@@ -180,10 +180,6 @@ export default class Tools extends Module {
    */
   private get internalTools(): { [toolName: string]: ToolConstructable | ToolSettings & { isInternal?: boolean } } {
     return {
-      convertTo: {
-        class: ConvertInlineTool,
-        isInternal: true,
-      },
       link: {
         class: LinkInlineTool,
         isInternal: true,
@@ -208,8 +204,20 @@ export default class Tools extends Module {
         class: HeadingH3ConvertTool,
         isInternal: true,
       },
+      convertHeadingH4: {
+        class: HeadingH4ConvertTool,
+        isInternal: true,
+      },
       convertQuote: {
         class: QuoteConvertInlineTool,
+        isInternal: true,
+      },
+      convertListUnordered: {
+        class: ListUnorderedConvertTool,
+        isInternal: true,
+      },
+      convertListOrdered: {
+        class: ListOrderedConvertTool,
         isInternal: true,
       },
       paragraph: {

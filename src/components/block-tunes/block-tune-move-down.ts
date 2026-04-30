@@ -5,7 +5,7 @@
  */
 
 import type { API, BlockTune } from '../../../types';
-import { IconChevronDown } from '@codexteam/icons';
+import { IconArrowDown } from '../icons';
 import type { TunesMenuConfig } from '../../../types/tools';
 
 
@@ -46,7 +46,7 @@ export default class MoveDownTune implements BlockTune {
    */
   public render(): TunesMenuConfig {
     return {
-      icon: IconChevronDown,
+      icon: IconArrowDown,
       title: this.api.i18n.t('Move down'),
       onActivate: (): void => this.handleClick(),
       name: 'move-down',

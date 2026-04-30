@@ -17,20 +17,10 @@ export interface PopoverParams {
   scopeElement?: HTMLElement;
 
   /**
-   * True if popover should contain search field
-   */
-  searchable?: boolean;
-
-  /**
    * False if keyboard navigation should be disabled.
    * True by default
    */
   flippable?: boolean;
-
-  /**
-   * Popover texts overrides
-   */
-  messages?: PopoverMessages
 
   /**
    * CSS class name for popover root element
@@ -41,18 +31,6 @@ export interface PopoverParams {
    * Popover nesting level. 0 value means that it is a root popover
    */
   nestingLevel?: number;
-}
-
-
-/**
- * Texts used inside popover
- */
-export interface PopoverMessages {
-  /** Text displayed when search has no results */
-  nothingFound?: string;
-
-  /** Search input label */
-  search?: string
 }
 
 
@@ -81,9 +59,6 @@ export interface PopoverNodes {
 
   /** Wraps all the visible popover elements, has background and rounded corners */
   popoverContainer: HTMLElement;
-
-  /** Message displayed when no items found while searching */
-  nothingFoundMessage: HTMLElement;
 
   /** Popover items wrapper */
   items: HTMLElement;

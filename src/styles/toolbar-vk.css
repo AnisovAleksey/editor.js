@@ -136,10 +136,6 @@
     opacity: 1;
   }
 
-  .ce-toolbox .ce-popover__search {
-    display: none;
-  }
-
   .ce-toolbox .ce-popover-item {
     position: relative;
     padding: 4px;
@@ -156,11 +152,6 @@
   .ce-toolbox .ce-popover-item__secondary-title {
     display: none;
   }
-}
-
-/* ===== Block settings: hide search (few items, not needed) ===== */
-.ce-settings .ce-popover__search {
-  display: none;
 }
 
 /* ===== Editor.js mobile fix ===== */

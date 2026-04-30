@@ -4,7 +4,7 @@
  * @copyright <CodeX Team> 2018
  */
 import type { API, BlockTune } from '../../../types';
-import { IconChevronUp } from '@codexteam/icons';
+import { IconArrowUp } from '../icons';
 import type { TunesMenuConfig } from '../../../types/tools';
 
 /**
@@ -44,7 +44,7 @@ export default class MoveUpTune implements BlockTune {
    */
   public render(): TunesMenuConfig {
     return {
-      icon: IconChevronUp,
+      icon: IconArrowUp,
       title: this.api.i18n.t('Move up'),
       onActivate: (): void => this.handleClick(),
       name: 'move-up',

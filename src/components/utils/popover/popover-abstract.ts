@@ -1,10 +1,9 @@
 import type { PopoverItem, PopoverItemRenderParamsMap } from './components/popover-item';
 import { PopoverItemDefault, PopoverItemSeparator, PopoverItemType } from './components/popover-item';
 import Dom from '../../dom';
-import type { SearchInput } from './components/search-input';
 import EventsDispatcher from '../events';
 import Listeners from '../listeners';
-import type { PopoverEventMap, PopoverMessages, PopoverParams, PopoverNodes } from '@/types/utils/popover/popover';
+import type { PopoverEventMap, PopoverParams, PopoverNodes } from '@/types/utils/popover/popover';
 import { PopoverEvent } from '@/types/utils/popover/popover-event';
 import { css } from './popover.const';
 import type { PopoverItemParams } from './components/popover-item';
@@ -30,24 +29,11 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
   protected nodes: Nodes;
 
   /**
-   * List of default popover items that are searchable and may have confirmation state
+   * List of default popover items that may have confirmation state
    */
   protected get itemsDefault(): PopoverItemDefault[] {
     return this.items.filter(item => item instanceof PopoverItemDefault) as PopoverItemDefault[];
   }
-
-  /**
-   * Instance of the Search Input
-   */
-  protected search: SearchInput | undefined;
-
-  /**
-   * Messages that will be displayed in popover
-   */
-  protected messages: PopoverMessages = {
-    nothingFound: 'Nothing found',
-    search: 'Search',
-  };
 
   /**
    * Constructs the instance
@@ -64,23 +50,11 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
 
     this.items = this.buildItems(params.items);
 
-    if (params.messages) {
-      this.messages = {
-        ...this.messages,
-        ...params.messages,
-      };
-    }
-
     /** Build html elements */
     this.nodes = {} as Nodes;
 
     this.nodes.popoverContainer = Dom.make('div', [ css.popoverContainer ]);
 
-    this.nodes.nothingFoundMessage = Dom.make('div', [ css.nothingFoundMessage ], {
-      textContent: this.messages.nothingFound,
-    });
-
-    this.nodes.popoverContainer.appendChild(this.nodes.nothingFoundMessage);
     this.nodes.items = Dom.make('div', [ css.items ]);
 
     this.items.forEach(item => {
@@ -117,10 +91,6 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
    */
   public show(): void {
     this.nodes.popover.classList.add(css.popoverOpened);
-
-    if (this.search !== undefined) {
-      this.search.focus();
-    }
   }
 
   /**
@@ -132,10 +102,6 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
 
     this.itemsDefault.forEach(item => item.reset());
 
-    if (this.search !== undefined) {
-      this.search.clear();
-    }
-
     this.emit(PopoverEvent.Closed);
   }
 
@@ -146,7 +112,6 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
     this.items.forEach(item => item.destroy());
     this.nodes.popover.remove();
     this.listeners.removeAll();
-    this.search?.destroy();
   }
 
   /**

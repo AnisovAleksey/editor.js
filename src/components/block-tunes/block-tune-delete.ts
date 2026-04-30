@@ -4,7 +4,7 @@
  * @copyright <CodeX Team> 2018
  */
 import type { API, BlockTune } from '../../../types';
-import { IconCross } from '@codexteam/icons';
+import { IconDelete } from '../icons';
 import type { MenuConfig } from '../../../types/tools/menu-config';
 
 /**
@@ -37,7 +37,7 @@ export default class DeleteTune implements BlockTune {
    */
   public render(): MenuConfig {
     return {
-      icon: IconCross,
+      icon: IconDelete,
       title: this.api.i18n.t('Delete'),
       name: 'delete',
       confirmation: {

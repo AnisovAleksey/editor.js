@@ -1,4 +1,9 @@
 /* ===== Heading levels (for @editorjs/header tool) ===== */
+/* Reset UA margins: block spacing in the editor comes from .ce-block layout,
+   not from heading user-agent margins. */
+.ce-header {
+  margin: 0;
+}
 h2.ce-header {
   font-size: 1.5em;
   font-weight: 700;

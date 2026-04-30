@@ -58,9 +58,10 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   private actionsEl: HTMLElement | null = null;
 
   /**
-   * Separator tool name — separator is inserted before this tool
+   * Tool names — a separator is inserted before each of these
+   * (skipped if the panel has no rendered tools yet, so it never appears at the start).
    */
-  private readonly separatorBefore = 'convertHeadingH2';
+  private readonly separatorBefore = new Set(['convertHeadingH2', 'bold']);
 
   constructor({ config, eventsDispatcher }: ModuleConfig) {
     super({ config, eventsDispatcher });
@@ -170,8 +171,8 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     this.actionsEl = $.make('div', this.CSS.actions);
 
     for (const [tool, instance] of this.tools) {
-      /** Insert separator before conversion tools */
-      if (tool.name === this.separatorBefore) {
+      /** Insert separator before designated tools, skip if the panel is still empty */
+      if (this.separatorBefore.has(tool.name) && this.container.children.length > 0) {
         this.container.appendChild($.make('div', this.CSS.separator));
       }
 
@@ -219,10 +220,26 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
           btn.classList.add(this.CSS.buttonActive);
         }
 
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
           e.preventDefault();
-          item.onActivate?.();
-          this.updateActiveStates();
+
+          const toolBefore = this.Editor.BlockManager.currentBlock?.name;
+
+          await item.onActivate?.();
+
+          const toolAfter = this.Editor.BlockManager.currentBlock?.name;
+
+          /**
+           * If the block's tool changed (e.g. paragraph → header), the
+           * available inline tools may differ — rebuild buttons in place
+           * without closing the panel (so a fresh selection isn't required).
+           * Otherwise just refresh active states on existing buttons.
+           */
+          if (toolBefore !== toolAfter) {
+            await this.rebuildTools();
+          } else {
+            this.updateActiveStates();
+          }
         });
 
         this.container.appendChild(btn);
@@ -366,6 +383,30 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     for (const tool of this.getTools()) {
       this.tools.set(tool, tool.create());
     }
+  }
+
+  /**
+   * Rebuild tool instances and buttons in place, without closing the panel.
+   * Used after a conversion tool changes the current block's tool — the
+   * available inline tools may differ, but the panel itself should stay open.
+   */
+  private async rebuildTools(): Promise<void> {
+    /** Detach shortcuts from the old tool instances */
+    for (const [tool, toolInstance] of this.tools) {
+      const shortcut = this.getToolShortcut(tool.name);
+
+      if (shortcut !== undefined) {
+        Shortcuts.remove(this.Editor.UI.nodes.redactor, shortcut);
+      }
+
+      if (_.isFunction(toolInstance.clear)) {
+        toolInstance.clear();
+      }
+    }
+
+    this.createToolsInstances();
+    await this.renderButtons();
+    this.move();
   }
 
   /**

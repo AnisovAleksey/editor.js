@@ -45,11 +45,6 @@
   svg {
     width: 24px;
     height: 24px;
-
-    /** Reset the global "path { stroke: currentColor }" from ui.css */
-    path {
-      stroke: unset;
-    }
   }
 }
 
