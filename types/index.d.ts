@@ -189,5 +189,17 @@ declare class EditorJS {
   public destroy(): void;
 }
 
+/**
+ * VK-style toolbar plugin — bundled with this fork.
+ * Pass an instance to EditorConfig.toolbar.plugin to get a VK-style "+" button
+ * (follows caret on empty blocks) and drag handle (follows hover on filled blocks).
+ */
+export class VkToolbarPlugin implements ToolbarPlugin {
+  constructor();
+  render(ctx: ToolbarPluginContext): void;
+  onBlockHover(block: ToolbarBlockInfo): void;
+  destroy(): void;
+}
+
 export as namespace EditorJS;
 export default EditorJS;

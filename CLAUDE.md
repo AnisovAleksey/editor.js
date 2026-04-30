@@ -120,7 +120,11 @@ Sub-components in `components/`:
 
 CSS injected into page via JS at runtime (Vite plugin):
 
-`main.css` (entry) → `variables.css`, `block.css`, `toolbar.css`, `inline-toolbar.css`, `popover.css`, `popover-inline.css`, `ui.css`, `animations.css`, `placeholders.css`, `input.css`, `export.css`, `stub.css`, `rtl.css`
+`main.css` (entry) → `variables.css`, `block.css`, `toolbar.css`, `inline-toolbar.css`, `popover.css`, `popover-inline.css`, `ui.css`, `animations.css`, `placeholders.css`, `input.css`, `export.css`, `stub.css`, `rtl.css`, `toolbar-vk.css`, `header-tool.css`
+
+`toolbar-vk.css` carries all VK-style overrides (hides core `.ce-toolbar`, styles `.ce-toolbar-vk-plus`/`.ce-toolbar-vk-drag`, horizontal toolbox, hides search in block-settings popover, mobile bottom-sheet layout). The mobile fix consumes a `--editor-vv-bottom` CSS variable that consumers must set from a visual-viewport listener at the app layer — without it the fixed-position toolbar falls back to `100vh`.
+
+`header-tool.css` styles `h2/h3/h4.ce-header` for the external `@editorjs/header` tool.
 
 ### Events (`src/components/events/`)
 
@@ -156,11 +160,21 @@ These are the files most relevant for modifying toolbar behavior:
 ```
 src/components/modules/toolbar/index.ts    — Toolbar module (positioning, plus button, toggling)
 src/components/modules/toolbar/blockSettings.ts — Block settings menu
+src/components/modules/toolbar/default-plugin.ts — Default toolbar plugin (core "+" + settings)
+src/components/modules/toolbar/vk-plugin.ts — VK-style toolbar plugin (separate "+" / drag handle)
 src/components/modules/ui.ts               — Creates editor DOM structure
 src/components/utils/popover/              — All popover rendering logic
 src/styles/toolbar.css                     — Toolbar styles
+src/styles/toolbar-vk.css                  — VK-toolbar overrides + mobile bottom-sheet fix
 src/styles/popover.css                     — Popover styles
 ```
+
+### Toolbar Plugins
+
+A toolbar plugin controls what UI elements appear in the toolbar's actions zone (see `types/configs/toolbar-plugin.d.ts`). Two are bundled:
+
+- **`DefaultToolbarPlugin`** — used automatically when `EditorConfig.toolbar.plugin` is omitted.
+- **`VkToolbarPlugin`** — exported as a named export from the package entry. Pass `new VkToolbarPlugin()` via `EditorConfig.toolbar.plugin` to get VK-style behavior: a circular "+" button that follows the caret on empty blocks, and a 6-dot drag handle that follows hover on filled blocks. Reparents `toolboxElement` and `blockSettingsElement` so popovers render adjacent to those buttons. Styles ship in `src/styles/toolbar-vk.css` (auto-injected via the CSS-in-JS Vite plugin).
 
 ## Data Flow
 

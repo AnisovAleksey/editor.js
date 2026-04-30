@@ -21,6 +21,8 @@ declare const VERSION: string;
  * @see Editor.js <https://editorjs.io>
  * @author CodeX Team <https://codex.so>
  */
+export { default as VkToolbarPlugin } from './components/modules/toolbar/vk-plugin';
+
 export default class EditorJS {
   /**
    * Promise that resolves when core modules are ready and UI is rendered on the page
