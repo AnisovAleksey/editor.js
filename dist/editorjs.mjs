@@ -1371,7 +1371,7 @@ class b {
    */
   static setCursor(e, t = 0) {
     const o = document.createRange(), i = window.getSelection();
-    return h.isNativeInput(e) ? h.canSetCaret(e) ? (e.focus(), e.selectionStart = e.selectionEnd = t, e.getBoundingClientRect()) : void 0 : (o.setStart(e, t), o.setEnd(e, t), i.removeAllRanges(), i.addRange(o), o.getBoundingClientRect());
+    return h.isNativeInput(e) ? (e.focus(), h.canSetCaret(e) && (e.selectionStart = e.selectionEnd = t), e.getBoundingClientRect()) : (o.setStart(e, t), o.setEnd(e, t), i.removeAllRanges(), i.addRange(o), o.getBoundingClientRect());
   }
   /**
    * Check if current range exists and belongs to container

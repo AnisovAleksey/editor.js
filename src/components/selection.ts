@@ -332,12 +332,18 @@ export default class SelectionUtils {
 
     /** if found deepest node is native input */
     if ($.isNativeInput(element)) {
-      if (!$.canSetCaret(element)) {
-        return;
-      }
-
       element.focus();
-      element.selectionStart = element.selectionEnd = offset;
+
+      /**
+       * `selectionStart`/`selectionEnd` throw `InvalidStateError` on inputs
+       * whose type doesn't support text selection (number, email, date,
+       * checkbox, button, …). Skip the caret assignment for those, but still
+       * focus the element and return its rect so callers like `Caret.set`
+       * can scroll it into view without crashing on a `null` return.
+       */
+      if ($.canSetCaret(element)) {
+        element.selectionStart = element.selectionEnd = offset;
+      }
 
       return element.getBoundingClientRect();
     }
