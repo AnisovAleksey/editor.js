@@ -509,23 +509,7 @@ class h {
    * @returns {boolean}
    */
   static canSetCaret(e) {
-    let t = !0;
-    if (h.isNativeInput(e))
-      switch (e.type) {
-        case "file":
-        case "checkbox":
-        case "radio":
-        case "hidden":
-        case "submit":
-        case "button":
-        case "image":
-        case "reset":
-          t = !1;
-          break;
-      }
-    else
-      t = h.isContentEditable(e);
-    return t;
+    return h.isNativeInput(e) ? e.tagName === "TEXTAREA" ? !0 : ["text", "search", "url", "tel", "password"].includes(e.type) : h.isContentEditable(e);
   }
   /**
    * Checks node if it is empty

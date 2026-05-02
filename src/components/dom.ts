@@ -325,26 +325,24 @@ export default class Dom {
    * @returns {boolean}
    */
   public static canSetCaret(target: HTMLElement): boolean {
-    let result = true;
-
     if (Dom.isNativeInput(target)) {
-      switch (target.type) {
-        case 'file':
-        case 'checkbox':
-        case 'radio':
-        case 'hidden':
-        case 'submit':
-        case 'button':
-        case 'image':
-        case 'reset':
-          result = false;
-          break;
+      if (target.tagName === 'TEXTAREA') {
+        return true;
       }
-    } else {
-      result = Dom.isContentEditable(target);
+
+      /**
+       * Per HTML spec, `selectionStart`/`selectionEnd` and `setSelectionRange`
+       * throw `InvalidStateError` on every input type except these. Touching
+       * them on `number`, `email`, `date`, `range`, `color`, etc. crashes the
+       * caller — see the test-carousel tool, where Editor.js used to crash on
+       * insert because the first input was `<input type="number">`.
+       */
+      const selectableTypes = ['text', 'search', 'url', 'tel', 'password'];
+
+      return selectableTypes.includes((target as HTMLInputElement).type);
     }
 
-    return result;
+    return Dom.isContentEditable(target);
   }
 
   /**
