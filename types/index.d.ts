@@ -201,5 +201,29 @@ export class VkToolbarPlugin implements ToolbarPlugin {
   destroy(): void;
 }
 
+/**
+ * Popover classes — runtime exports for consumers that want to build their own
+ * menus on top of the same Popover infrastructure used internally by Block Tunes.
+ */
+export class PopoverDesktop {
+  constructor(params: import('./utils/popover').PopoverParams);
+  show(): void;
+  hide(): void;
+  destroy(): void;
+  getElement(): HTMLElement;
+  on(event: string, cb: (data?: unknown) => void): void;
+  off(event: string, cb: (data?: unknown) => void): void;
+}
+
+export class PopoverMobile {
+  constructor(params: import('./utils/popover').PopoverParams);
+  show(): void;
+  hide(): void;
+  destroy(): void;
+  getElement(): HTMLElement;
+  on(event: string, cb: (data?: unknown) => void): void;
+  off(event: string, cb: (data?: unknown) => void): void;
+}
+
 export as namespace EditorJS;
 export default EditorJS;

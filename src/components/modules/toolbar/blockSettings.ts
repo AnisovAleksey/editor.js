@@ -140,6 +140,7 @@ export default class BlockSettings extends Module<BlockSettingsNodes> {
     this.popover = new PopoverClass({
       items: this.getTunesItems(commonTunes, toolTunes),
       scopeElement: this.Editor.API.methods.ui.nodes.redactor,
+      class: 'ce-popover--vk-menu',
     });
 
     this.popover.on(PopoverEvent.Closed, this.onPopoverClose);

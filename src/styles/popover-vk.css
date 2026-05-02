@@ -1,0 +1,207 @@
+/* ============================================================
+ * VK-style popover overrides.
+ *
+ * Applied via `class: 'ce-popover--vk-menu'` passed to PopoverDesktop /
+ * PopoverMobile in BlockSettings and the table action-sheet, so the
+ * Block Tunes menu and the table row/column menu share one visual language.
+ *
+ * Cascades into nested popovers (color picker sub-menu) via
+ * `.ce-popover--vk-menu .ce-popover--nested`.
+ * ============================================================ */
+
+.ce-popover--vk-menu {
+  --width: 212px;
+
+  & > .ce-popover__container {
+    border-radius: 8px;
+    border: none;
+    box-shadow:
+      rgba(0, 0, 0, 0.12) 0 0 8px 0,
+      rgba(0, 0, 0, 0.16) 0 16px 16px 0;
+    padding: 0;
+  }
+
+  &.ce-popover--opened > .ce-popover__container {
+    padding: 6px 0 8px;
+    border: none;
+    animation: vkMenuShowing 200ms linear;
+  }
+
+  .ce-popover__items {
+    overflow-y: auto;
+  }
+
+  .ce-popover-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 8px 8px 12px;
+    margin: 0;
+    border-radius: 0;
+    min-height: 36px;
+    background: transparent;
+
+    &:not(:last-of-type) {
+      margin-bottom: 0;
+    }
+  }
+
+  .ce-popover-item__icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    background: transparent;
+    color: rgb(68, 123, 186);
+    flex-shrink: 0;
+  }
+
+  .ce-popover-item__icon svg {
+    width: 20px;
+    height: 20px;
+    shape-rendering: geometricPrecision;
+  }
+
+  .ce-popover-item__icon--tool {
+    margin-right: 12px;
+    box-shadow: none;
+  }
+
+  .ce-popover-item__title {
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 400;
+    color: rgb(0, 0, 0);
+  }
+
+  @media (--can-hover) {
+    .ce-popover-item:hover:not(.ce-popover-item--no-hover) {
+      background-color: rgba(174, 183, 194, 0.12);
+    }
+  }
+
+  .ce-popover-item--focused:not(.ce-popover-item--no-focus) {
+    background: rgba(174, 183, 194, 0.18) !important;
+  }
+
+  .ce-popover-item--disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Active toggle (e.g. "Заголовок таблицы" when withHeadings is on) */
+  .ce-popover-item--active {
+    background: transparent;
+    color: rgb(0, 0, 0);
+  }
+
+  .ce-popover-item--active .ce-popover-item__icon {
+    color: rgb(68, 123, 186);
+    background: transparent;
+  }
+
+  /* Danger modifier — used for delete actions (red icon, no red background).
+   * Triggered by item.name starting with "delete-" (PopoverItemDefault writes
+   * name to data-item-name) or by the upstream "delete" common tune. */
+  .ce-popover-item--vk-danger .ce-popover-item__icon,
+  .ce-popover-item[data-item-name^="delete-"] .ce-popover-item__icon,
+  .ce-popover-item[data-item-name="delete"] .ce-popover-item__icon {
+    color: rgb(230, 70, 70);
+  }
+
+  /* Override upstream confirmation-state styling: keep VK look (red icon, no
+   * red background) instead of the white-on-red default. */
+  .ce-popover-item--confirmation {
+    background: transparent !important;
+  }
+
+  .ce-popover-item--confirmation .ce-popover-item__title,
+  .ce-popover-item--confirmation .ce-popover-item__icon {
+    color: rgb(230, 70, 70);
+  }
+}
+
+/* Cascade overrides into nested popovers (color picker sub-menu, etc.) */
+.ce-popover--vk-menu .ce-popover--nested {
+  & > .ce-popover__container {
+    border-radius: 8px;
+    border: none;
+    box-shadow:
+      rgba(0, 0, 0, 0.12) 0 0 8px 0,
+      rgba(0, 0, 0, 0.16) 0 16px 16px 0;
+  }
+
+  &.ce-popover--opened > .ce-popover__container {
+    animation: vkMenuShowing 200ms linear;
+  }
+}
+
+@keyframes vkMenuShowing {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----- Mobile (bottom-sheet) ----- */
+@media (--mobile) {
+  .ce-popover--vk-menu .ce-popover-item {
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+
+  .ce-popover--vk-menu .ce-popover-item__icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 14px;
+  }
+
+  .ce-popover--vk-menu .ce-popover-item__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ce-popover--vk-menu .ce-popover-item__title {
+    font-size: 15px;
+    line-height: 20px;
+  }
+}
+
+/* ----- Dark mode ----- */
+@media (prefers-color-scheme: dark) {
+  .ce-popover--vk-menu > .ce-popover__container,
+  .ce-popover--vk-menu .ce-popover--nested > .ce-popover__container {
+    background: rgb(40, 40, 40);
+    box-shadow:
+      rgba(0, 0, 0, 0.24) 0 0 8px 0,
+      rgba(0, 0, 0, 0.32) 0 16px 16px 0;
+  }
+
+  .ce-popover--vk-menu .ce-popover-item__title {
+    color: rgb(200, 200, 200);
+  }
+
+  .ce-popover--vk-menu .ce-popover-item__icon {
+    color: rgb(120, 165, 215);
+  }
+
+  .ce-popover--vk-menu .ce-popover-item--vk-danger .ce-popover-item__icon,
+  .ce-popover--vk-menu .ce-popover-item[data-item-name^="delete-"] .ce-popover-item__icon,
+  .ce-popover--vk-menu .ce-popover-item[data-item-name="delete"] .ce-popover-item__icon {
+    color: rgb(240, 110, 110);
+  }
+
+  @media (--can-hover) {
+    .ce-popover--vk-menu .ce-popover-item:hover:not(.ce-popover-item--no-hover) {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .ce-popover--vk-menu .ce-popover-item--focused:not(.ce-popover-item--no-focus) {
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+}

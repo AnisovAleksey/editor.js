@@ -22,6 +22,9 @@ declare const VERSION: string;
  * @author CodeX Team <https://codex.so>
  */
 export { default as VkToolbarPlugin } from './components/modules/toolbar/vk-plugin';
+export { PopoverDesktop, PopoverMobile, PopoverItemType } from './components/utils/popover';
+export { PopoverEvent } from '@/types/utils/popover/popover-event';
+export type { PopoverItemParams, PopoverParams } from '@/types/utils/popover';
 
 export default class EditorJS {
   /**
